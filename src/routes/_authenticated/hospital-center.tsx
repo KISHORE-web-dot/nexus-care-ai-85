@@ -42,7 +42,10 @@ function HospitalCenterPage() {
     setSaving(id);
     const { error } = await supabase.from("hospitals").update(patch as never).eq("id", id);
     setSaving(null);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["hospitals"] });
     toast.success("Hospital capacity updated");
   };
