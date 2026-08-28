@@ -6,8 +6,8 @@ interface Props {
   label: string;
   value: string | number;
   icon: LucideIcon;
-  hint?: string;
-  tone?: "default" | "emergency" | "success" | "warning";
+  hint?: string | undefined;
+  tone?: "default" | "emergency" | "success" | "warning" | undefined;
 }
 
 const TONES: Record<string, string> = {

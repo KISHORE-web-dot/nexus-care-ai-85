@@ -19,7 +19,6 @@ import type { AppRole } from "@/lib/types";
 import { DEMO_ACCOUNTS, resetPassword, signIn, signInDemo, signUp } from "@/services/authService";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({ demo: search["demo"] === "1" ? "1" : undefined }),
   head: () => ({
     meta: [
       { title: "Sign in — SmartResponse Emergency Platform" },
