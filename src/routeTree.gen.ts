@@ -14,7 +14,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDoctorRouteImport } from './routes/_authenticated/doctor'
+import { Route as AuthenticatedHospitalCenterRouteImport } from './routes/_authenticated/hospital-center'
 import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/live'
+import { Route as AuthenticatedRequestsRouteImport } from './routes/_authenticated/requests'
 import { Route as AuthenticatedSosRouteImport } from './routes/_authenticated/sos'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,9 +44,25 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDoctorRoute = AuthenticatedDoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHospitalCenterRoute =
+  AuthenticatedHospitalCenterRouteImport.update({
+    id: '/hospital-center',
+    path: '/hospital-center',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLiveRoute = AuthenticatedLiveRouteImport.update({
   id: '/live',
   path: '/live',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRequestsRoute = AuthenticatedRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSosRoute = AuthenticatedSosRouteImport.update({
@@ -57,7 +76,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/doctor': typeof AuthenticatedDoctorRoute
+  '/hospital-center': typeof AuthenticatedHospitalCenterRoute
   '/live': typeof AuthenticatedLiveRoute
+  '/requests': typeof AuthenticatedRequestsRoute
   '/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRoutesByTo {
@@ -65,7 +87,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/doctor': typeof AuthenticatedDoctorRoute
+  '/hospital-center': typeof AuthenticatedHospitalCenterRoute
   '/live': typeof AuthenticatedLiveRoute
+  '/requests': typeof AuthenticatedRequestsRoute
   '/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRoutesById {
@@ -75,14 +100,35 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/doctor': typeof AuthenticatedDoctorRoute
+  '/_authenticated/hospital-center': typeof AuthenticatedHospitalCenterRoute
   '/_authenticated/live': typeof AuthenticatedLiveRoute
+  '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/_authenticated/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/live' | '/sos'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/dashboard'
+    | '/doctor'
+    | '/hospital-center'
+    | '/live'
+    | '/requests'
+    | '/sos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/live' | '/sos'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/dashboard'
+    | '/doctor'
+    | '/hospital-center'
+    | '/live'
+    | '/requests'
+    | '/sos'
   id:
     | '__root__'
     | '/'
@@ -90,7 +136,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/doctor'
+    | '/_authenticated/hospital-center'
     | '/_authenticated/live'
+    | '/_authenticated/requests'
     | '/_authenticated/sos'
   fileRoutesById: FileRoutesById
 }
@@ -138,11 +187,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/doctor': {
+      id: '/_authenticated/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof AuthenticatedDoctorRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/hospital-center': {
+      id: '/_authenticated/hospital-center'
+      path: '/hospital-center'
+      fullPath: '/hospital-center'
+      preLoaderRoute: typeof AuthenticatedHospitalCenterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/live': {
       id: '/_authenticated/live'
       path: '/live'
       fullPath: '/live'
       preLoaderRoute: typeof AuthenticatedLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/requests': {
+      id: '/_authenticated/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof AuthenticatedRequestsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sos': {
@@ -157,13 +227,19 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDoctorRoute: typeof AuthenticatedDoctorRoute
+  AuthenticatedHospitalCenterRoute: typeof AuthenticatedHospitalCenterRoute
   AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
+  AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedSosRoute: typeof AuthenticatedSosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDoctorRoute: AuthenticatedDoctorRoute,
+  AuthenticatedHospitalCenterRoute: AuthenticatedHospitalCenterRoute,
   AuthenticatedLiveRoute: AuthenticatedLiveRoute,
+  AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedSosRoute: AuthenticatedSosRoute,
 }
 
