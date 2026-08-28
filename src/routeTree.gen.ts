@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/live'
+import { Route as AuthenticatedSosRouteImport } from './routes/_authenticated/sos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +41,32 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLiveRoute = AuthenticatedLiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSosRoute = AuthenticatedSosRouteImport.update({
+  id: '/sos',
+  path: '/sos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/live': typeof AuthenticatedLiveRoute
+  '/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/live': typeof AuthenticatedLiveRoute
+  '/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +75,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/live': typeof AuthenticatedLiveRoute
+  '/_authenticated/sos': typeof AuthenticatedSosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard'
+  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/live' | '/sos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/dashboard'
+  to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/live' | '/sos'
   id:
     | '__root__'
     | '/'
@@ -72,6 +90,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/dashboard'
+    | '/_authenticated/live'
+    | '/_authenticated/sos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,15 +138,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/live': {
+      id: '/_authenticated/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof AuthenticatedLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sos': {
+      id: '/_authenticated/sos'
+      path: '/sos'
+      fullPath: '/sos'
+      preLoaderRoute: typeof AuthenticatedSosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
+  AuthenticatedSosRoute: typeof AuthenticatedSosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedLiveRoute: AuthenticatedLiveRoute,
+  AuthenticatedSosRoute: AuthenticatedSosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
