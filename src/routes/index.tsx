@@ -70,7 +70,7 @@ function Landing() {
               <Link to="/auth">Login</Link>
             </Button>
             <Button asChild size="sm">
-              <Link to="/auth" search={{ demo: "1" }}>
+              <Link to="/auth">
                 View demo
               </Link>
             </Button>
@@ -93,7 +93,7 @@ function Landing() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="destructive">
-                <Link to="/auth" search={{ demo: "1" }}>
+                <Link to="/auth">
                   <Siren className="size-5" aria-hidden /> Request emergency assistance
                 </Link>
               </Button>
