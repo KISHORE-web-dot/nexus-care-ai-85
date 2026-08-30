@@ -13,8 +13,10 @@ import {
   Siren,
   Stethoscope,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,6 +58,87 @@ const FEATURES = [
   { icon: Activity, title: "Analytics", text: "Operations dashboard with live charts and tables." },
 ];
 
+const WALKTHROUGH_STEPS = [
+  { label: "SOS received", meta: "Road accident · Coimbatore", tone: "bg-emergency", dotPulse: true },
+  { label: "AI priority: CRITICAL", meta: "Unconscious · heavy bleeding", tone: "bg-warning", dotPulse: false },
+  { label: "TN38AB1234 dispatched", meta: "ICU ambulance · ETA 7 min", tone: "bg-primary", dotPulse: false },
+  { label: "Hospital selected", meta: "Trauma + ICU available", tone: "bg-success", dotPulse: false },
+] as const;
+
+function HeroWalkthrough() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setActiveStep((s) => (s + 1) % WALKTHROUGH_STEPS.length);
+        setVisible(true);
+      }, 300);
+    }, 2200);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="card-surface space-y-3 p-5">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">Live case walkthrough</p>
+        <div className="flex gap-1.5">
+          {WALKTHROUGH_STEPS.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => { setActiveStep(i); setVisible(true); }}
+              aria-label={`Jump to step ${i + 1}`}
+              className={cn(
+                "size-1.5 rounded-full transition-all duration-300",
+                i === activeStep ? "bg-primary scale-125" : "bg-muted-foreground/30",
+              )}
+            />
+          ))}
+        </div>
+      </div>
+
+      {WALKTHROUGH_STEPS.map((row, i) => (
+        <div
+          key={row.label}
+          className={cn(
+            "flex items-center gap-3 rounded-lg border border-border p-3 transition-all duration-300",
+            i === activeStep
+              ? visible
+                ? "opacity-100 translate-y-0 shadow-sm"
+                : "opacity-0 -translate-y-1"
+              : i < activeStep
+                ? "opacity-60"
+                : "opacity-20",
+          )}
+        >
+          <span
+            className={cn(
+              "size-2.5 rounded-full transition-all",
+              row.tone,
+              i === activeStep && "ring-2 ring-offset-1 ring-offset-card",
+              row.dotPulse && i === activeStep && "animate-pulse",
+            )}
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">{row.label}</p>
+            <p className="text-xs text-muted-foreground">{row.meta}</p>
+          </div>
+          {i < activeStep ? (
+            <span className="text-xs font-medium text-success">✓</span>
+          ) : i === activeStep ? (
+            <span className="text-xs font-medium text-primary animate-pulse">●</span>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 function Landing() {
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +176,7 @@ function Landing() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="destructive">
-                <Link to="/auth">
+                <Link to="/emergency">
                   <Siren className="size-5" aria-hidden /> Request emergency assistance
                 </Link>
               </Button>
@@ -103,23 +186,7 @@ function Landing() {
             </div>
           </div>
 
-          <div className="card-surface space-y-3 p-5">
-            <p className="text-sm font-medium text-muted-foreground">Live case walkthrough</p>
-            {[
-              { label: "SOS received", meta: "Road accident · Coimbatore", tone: "bg-emergency" },
-              { label: "AI priority: CRITICAL", meta: "Unconscious · heavy bleeding", tone: "bg-warning" },
-              { label: "TN38AB1234 dispatched", meta: "ICU ambulance · ETA 7 min", tone: "bg-primary" },
-              { label: "Hospital selected", meta: "Trauma + ICU available", tone: "bg-success" },
-            ].map((row) => (
-              <div key={row.label} className="flex items-center gap-3 rounded-lg border border-border p-3">
-                <span className={`size-2.5 rounded-full ${row.tone}`} aria-hidden />
-                <div>
-                  <p className="text-sm font-medium">{row.label}</p>
-                  <p className="text-xs text-muted-foreground">{row.meta}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <HeroWalkthrough />
         </div>
       </section>
 

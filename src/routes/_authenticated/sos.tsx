@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { AmbulanceCard, HospitalCard } from "@/components/emergency/cards";
 import { PriorityBadge } from "@/components/emergency/badges";
-import { ErrorState } from "@/components/emergency/states";
+import { ErrorState, LoadingState } from "@/components/emergency/states";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,11 @@ export const Route = createFileRoute("/_authenticated/sos")({
     ],
   }),
   component: SosPage,
+  pendingComponent: () => (
+    <AppShell title="Emergency SOS">
+      <LoadingState label="Loading emergency services…" />
+    </AppShell>
+  ),
 });
 
 type Step = "location" | "form" | "ai" | "dispatch";
@@ -337,9 +342,14 @@ function SosPage() {
                 <p className="rounded-md border border-warning/40 bg-warning/10 p-3 text-xs">
                   AI assessment is decision support only. It does not replace professional medical judgment.
                 </p>
-                <Button className="w-full" onClick={findAmbulances}>
-                  Find best ambulance
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setStep("form")} disabled={analysing}>
+                    Back
+                  </Button>
+                  <Button className="flex-1" onClick={findAmbulances}>
+                    Find best ambulance
+                  </Button>
+                </div>
               </>
             )}
           </section>
@@ -348,9 +358,21 @@ function SosPage() {
         {step === "dispatch" ? (
           <section className="space-y-4">
             <div className="card-surface p-6">
-              <h2 className="text-lg font-semibold">
-                {searching ? "Searching for suitable ambulance…" : "Ambulance dispatch"}
-              </h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold">
+                  {searching ? "Searching for suitable ambulance…" : "Ambulance dispatch"}
+                </h2>
+                {!assigned ? (
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setStep("ai")} disabled={searching || assigning}>
+                      Back
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/dashboard" })} disabled={assigning}>
+                      Cancel
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
               {searching ? (
                 <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" aria-hidden /> Scoring availability, distance, traffic and
