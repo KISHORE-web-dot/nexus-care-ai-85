@@ -1,0 +1,238 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Default Deny Catch-all ──────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ── Global Helper Primitives ─────────────────────────────────────────────
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'tonyisaac543@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ── Entity Validation Helpers ────────────────────────────────────────────
+
+    function isValidUserProfile(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+        (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+        data.role in ['PATIENT', 'DRIVER', 'PARAMEDIC', 'DOCTOR', 'HOSPITAL', 'ADMIN'] &&
+        (!('createdAt' in data) || data.createdAt == null || (data.createdAt is string && data.createdAt.size() <= 50));
+    }
+
+    function isValidTenant(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 150 &&
+        data.slug is string && data.slug.size() > 0 && data.slug.size() <= 100 &&
+        data.region is string && data.region.size() > 0 && data.region.size() <= 100 &&
+        data.hotline is string && data.hotline.size() > 0 && data.hotline.size() <= 50 &&
+        data.center_latitude is number &&
+        data.center_longitude is number &&
+        data.status in ['ACTIVE', 'MAINTENANCE', 'INACTIVE'];
+    }
+
+    function isValidPatient(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.user_id is string && isValidId(data.user_id) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+        (!('gender' in data) || data.gender == null || (data.gender is string && data.gender.size() <= 20)) &&
+        (!('blood_group' in data) || data.blood_group == null || (data.blood_group is string && data.blood_group.size() <= 10)) &&
+        (!('emergency_contact' in data) || data.emergency_contact == null || (data.emergency_contact is string && data.emergency_contact.size() <= 50)) &&
+        (!('medical_history' in data) || data.medical_history == null || (data.medical_history is string && data.medical_history.size() <= 500)) &&
+        (!('allergies' in data) || data.allergies == null || (data.allergies is string && data.allergies.size() <= 500));
+    }
+
+    function isValidEmergency(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.reported_by is string && data.reported_by.size() <= 128 &&
+        data.patient_name is string && data.patient_name.size() > 0 && data.patient_name.size() <= 100 &&
+        data.emergency_type is string && data.emergency_type.size() > 0 && data.emergency_type.size() <= 50 &&
+        data.severity in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] &&
+        data.status in [
+          'CREATED', 'AI_ASSESSED', 'AMBULANCE_ASSIGNED', 'DRIVER_ACCEPTED',
+          'GOING_TO_PATIENT', 'ARRIVED_AT_PATIENT', 'PATIENT_ONBOARD',
+          'GOING_TO_HOSPITAL', 'ARRIVED_AT_HOSPITAL', 'COMPLETED', 'CANCELLED'
+        ] &&
+        data.latitude is number && data.longitude is number &&
+        (!('description' in data) || data.description == null || (data.description is string && data.description.size() <= 1000)) &&
+        (!('address' in data) || data.address == null || (data.address is string && data.address.size() <= 300)) &&
+        (!('ambulance_id' in data) || data.ambulance_id == null || (data.ambulance_id is string && data.ambulance_id.size() <= 128)) &&
+        (!('hospital_id' in data) || data.hospital_id == null || (data.hospital_id is string && data.hospital_id.size() <= 128));
+    }
+
+    function isValidAmbulance(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.ambulance_number is string && data.ambulance_number.size() > 0 && data.ambulance_number.size() <= 50 &&
+        data.latitude is number && data.longitude is number &&
+        data.status in [
+          'AVAILABLE', 'BUSY', 'OFFLINE', 'EMERGENCY_ASSIGNED',
+          'GOING_TO_PATIENT', 'ARRIVED_AT_PATIENT', 'PATIENT_ONBOARD',
+          'GOING_TO_HOSPITAL', 'ARRIVED_AT_HOSPITAL', 'COMPLETED'
+        ] &&
+        data.ambulance_type in ['NORMAL', 'ICU', 'ADVANCED_LIFE_SUPPORT'] &&
+        (!('driver_name' in data) || data.driver_name == null || (data.driver_name is string && data.driver_name.size() <= 100));
+    }
+
+    function isValidHospital(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 150 &&
+        data.latitude is number && data.longitude is number &&
+        data.available_beds is number && data.icu_beds is number &&
+        data.emergency_available is bool &&
+        data.status in ['ACTIVE', 'BUSY', 'OFFLINE'] &&
+        (!('phone' in data) || data.phone == null || (data.phone is string && data.phone.size() <= 30)) &&
+        (!('address' in data) || data.address == null || (data.address is string && data.address.size() <= 300));
+    }
+
+    function isValidTimelineEvent(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.emergency_id is string && isValidId(data.emergency_id) &&
+        data.event is string && data.event.size() > 0 && data.event.size() <= 100 &&
+        (!('description' in data) || data.description == null || (data.description is string && data.description.size() <= 500)) &&
+        (!('user_id' in data) || data.user_id == null || (data.user_id is string && data.user_id.size() <= 128));
+    }
+
+    function isValidNotification(data) {
+      return data.id is string && isValidId(data.id) &&
+        data.title is string && data.title.size() > 0 && data.title.size() <= 150 &&
+        data.read is bool &&
+        (!('message' in data) || data.message == null || (data.message is string && data.message.size() <= 500)) &&
+        (!('type' in data) || data.type in ['INFO', 'SUCCESS', 'WARNING', 'CRITICAL']) &&
+        (!('user_id' in data) || data.user_id == null || (data.user_id is string && data.user_id.size() <= 128));
+    }
+
+    // ── Collection Rules ─────────────────────────────────────────────────────
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Tenants (Multi-tenancy Organizations)
+    match /tenants/{tenantId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(tenantId) && (isAdmin() || (isSignedIn() && isValidTenant(incoming())));
+      allow delete: if isValidId(tenantId) && isAdmin();
+    }
+
+    // User Profiles
+    match /profiles/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn();
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming()) && (
+        incoming().role != 'ADMIN' || isAdmin()
+      );
+      allow update: if isValidId(userId) && (
+        isAdmin() ||
+        (isOwner(userId) && isValidUserProfile(incoming()) &&
+         incoming().id == existing().id &&
+         incoming().email == existing().email &&
+         incoming().role == existing().role)
+      );
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // Patients
+    match /patients/{patientId} {
+      allow get: if isValidId(patientId) && (
+        isAdmin() || (isSignedIn() && resource.data.user_id == request.auth.uid)
+      );
+      allow list: if isSignedIn();
+      allow create: if isValidId(patientId) && (
+        isAdmin() || (isSignedIn() && incoming().user_id == request.auth.uid && isValidPatient(incoming()))
+      );
+      allow update: if isValidId(patientId) && (
+        isAdmin() || (isSignedIn() && existing().user_id == request.auth.uid && incoming().user_id == existing().user_id && isValidPatient(incoming()))
+      );
+      allow delete: if isValidId(patientId) && (isAdmin() || (isSignedIn() && existing().user_id == request.auth.uid));
+    }
+
+    // Emergencies
+    match /emergencies/{emergencyId} {
+      allow get: if isValidId(emergencyId);
+      allow list: if true;
+      allow create: if isValidId(emergencyId) && isValidEmergency(incoming()) && (
+        !isSignedIn() || incoming().reported_by == request.auth.uid
+      );
+      allow update: if isValidId(emergencyId) && isValidEmergency(incoming()) && (
+        isAdmin() ||
+        (existing().status != 'COMPLETED' && existing().status != 'CANCELLED')
+      );
+      allow delete: if isValidId(emergencyId) && isAdmin();
+    }
+
+    // Ambulances
+    match /ambulances/{ambulanceId} {
+      allow get: if isValidId(ambulanceId);
+      allow list: if true;
+      allow create: if isValidId(ambulanceId) && (isAdmin() || isValidAmbulance(incoming()));
+      allow update: if isValidId(ambulanceId) && (
+        isAdmin() ||
+        (isSignedIn() && isValidAmbulance(incoming()))
+      );
+      allow delete: if isValidId(ambulanceId) && isAdmin();
+    }
+
+    // Hospitals
+    match /hospitals/{hospitalId} {
+      allow get: if isValidId(hospitalId);
+      allow list: if true;
+      allow create: if isValidId(hospitalId) && (isAdmin() || isValidHospital(incoming()));
+      allow update: if isValidId(hospitalId) && (
+        isAdmin() ||
+        (isSignedIn() && isValidHospital(incoming()))
+      );
+      allow delete: if isValidId(hospitalId) && isAdmin();
+    }
+
+    // Emergency Timeline
+    match /emergency_timeline/{eventId} {
+      allow get: if isValidId(eventId);
+      allow list: if true;
+      allow create: if isValidId(eventId) && isValidTimelineEvent(incoming());
+      allow update, delete: if isValidId(eventId) && isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow get: if isValidId(notificationId) && (
+        isAdmin() || !isSignedIn() || resource.data.user_id == null || resource.data.user_id == request.auth.uid
+      );
+      allow list: if true;
+      allow create: if isValidId(notificationId) && isValidNotification(incoming());
+      allow update: if isValidId(notificationId) && isValidNotification(incoming()) && (
+        isAdmin() || incoming().diff(existing()).affectedKeys().hasOnly(['read'])
+      );
+      allow delete: if isValidId(notificationId) && isAdmin();
+    }
+  }
+}

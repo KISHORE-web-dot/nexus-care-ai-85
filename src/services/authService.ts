@@ -1,4 +1,12 @@
-import { supabase } from "@/integrations/supabase/client";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  auth,
+  db,
+  googleProvider,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+} from "@/lib/firebase";
+import { handleFirestoreError, OperationType } from "@/lib/firestoreErrors";
 import type { AppRole } from "@/lib/types";
 
 export interface DemoAccount {
@@ -8,89 +16,136 @@ export interface DemoAccount {
   label: string;
 }
 
-/** Demo identities used for the walkthrough. Credentials are never rendered in the UI. */
+/** Demo identities used for walkthrough. */
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { role: "PATIENT", email: "patient@demo.emergency.app", name: "Anitha Raman", label: "Patient Demo" },
+  {
+    role: "PATIENT",
+    email: "patient@demo.emergency.app",
+    name: "Anitha Raman",
+    label: "Patient Demo",
+  },
   { role: "DRIVER", email: "driver@demo.emergency.app", name: "Ravi Kumar", label: "Driver Demo" },
-  { role: "HOSPITAL", email: "hospital@demo.emergency.app", name: "Aravind Control Desk", label: "Hospital Demo" },
-  { role: "DOCTOR", email: "doctor@demo.emergency.app", name: "Dr. Meera Nair", label: "Doctor Demo" },
-  { role: "ADMIN", email: "admin@demo.emergency.app", name: "Operations Admin", label: "Admin Demo" },
+  {
+    role: "HOSPITAL",
+    email: "hospital@demo.emergency.app",
+    name: "Aravind Control Desk",
+    label: "Hospital Demo",
+  },
+  {
+    role: "DOCTOR",
+    email: "doctor@demo.emergency.app",
+    name: "Dr. Meera Nair",
+    label: "Doctor Demo",
+  },
+  {
+    role: "ADMIN",
+    email: "admin@demo.emergency.app",
+    name: "Operations Admin",
+    label: "Admin Demo",
+  },
 ];
 
-const DEMO_SECRET = "Demo#Emergency2026";
+export async function ensureProfile(
+  userId: string,
+  name: string,
+  email: string,
+  phone: string | null,
+  role: AppRole,
+) {
+  const profileRef = doc(db, "profiles", userId);
+  try {
+    const existing = await getDoc(profileRef);
+    if (!existing.exists()) {
+      await setDoc(profileRef, {
+        id: userId,
+        name: name || "User",
+        email: email || "",
+        phone: phone || "",
+        role: role || "PATIENT",
+        createdAt: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `profiles/${userId}`);
+  }
 
-export async function ensureProfile(userId: string, name: string, email: string, phone: string | null, role: AppRole) {
-  await supabase.from("profiles").upsert({ id: userId, name, email, phone } as never);
-  await supabase.from("user_roles").upsert({ user_id: userId, role } as never, {
-    onConflict: "user_id,role",
-    ignoreDuplicates: true,
-  } as never);
   if (role === "PATIENT") {
-    const { data } = await supabase.from("patients").select("id").eq("user_id", userId).maybeSingle();
-    if (!data) {
-      await supabase.from("patients").insert({ user_id: userId, name, phone } as never);
+    const patientRef = doc(db, "patients", userId);
+    try {
+      const patientDoc = await getDoc(patientRef);
+      if (!patientDoc.exists()) {
+        await setDoc(patientRef, {
+          id: userId,
+          user_id: userId,
+          name: name || "Patient",
+          phone: phone || "",
+        });
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `patients/${userId}`);
     }
   }
 }
 
-export async function signUp(params: {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  role: AppRole;
-}) {
-  const { data, error } = await supabase.auth.signUp({
-    email: params.email,
-    password: params.password,
-    options: {
-      emailRedirectTo: `${window.location.origin}/dashboard`,
-      data: { name: params.name, phone: params.phone, role: params.role },
-    },
-  });
-  if (error) throw error;
-  if (data.user && data.session) {
-    await ensureProfile(data.user.id, params.name, params.email, params.phone, params.role);
+export async function signInWithGoogle(selectedRole: AppRole = "PATIENT") {
+  const result = await signInWithPopup(auth, googleProvider);
+  const user = result.user;
+  if (user) {
+    await ensureProfile(
+      user.uid,
+      user.displayName || "Google User",
+      user.email || "",
+      user.phoneNumber || null,
+      selectedRole,
+    );
   }
-  return data;
-}
-
-export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data;
+  return user;
 }
 
 export async function signInDemo(account: DemoAccount) {
-  let result = await supabase.auth.signInWithPassword({
-    email: account.email,
-    password: DEMO_SECRET,
-  });
-  if (result.error) {
-    const { error: signUpError } = await supabase.auth.signUp({
+  // Store active demo profile for interactive preview
+  const demoUserId = `demo-${account.role.toLowerCase()}`;
+  localStorage.setItem(
+    "demo_auth_user",
+    JSON.stringify({
+      uid: demoUserId,
       email: account.email,
-      password: DEMO_SECRET,
-      options: { data: { name: account.name, role: account.role } },
-    });
-    if (signUpError && !signUpError.message.toLowerCase().includes("already")) throw signUpError;
-    result = await supabase.auth.signInWithPassword({ email: account.email, password: DEMO_SECRET });
-    if (result.error) throw result.error;
-  }
-  const user = result.data.user;
-  if (user) await ensureProfile(user.id, account.name, account.email, "+91 90000 0000", account.role);
-  return result.data;
+      displayName: account.name,
+      role: account.role,
+    }),
+  );
+  window.dispatchEvent(new Event("demo-auth-changed"));
+  return {
+    uid: demoUserId,
+    email: account.email,
+    displayName: account.name,
+    role: account.role,
+  };
 }
 
-export async function resetPassword(email: string) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
-  });
-  if (error) throw error;
+export async function signOut() {
+  localStorage.removeItem("demo_auth_user");
+  window.dispatchEvent(new Event("demo-auth-changed"));
+  await firebaseSignOut(auth);
 }
 
 export async function fetchRole(userId: string): Promise<AppRole | null> {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).limit(1).maybeSingle();
-  return ((data as { role: AppRole } | null)?.role as AppRole) ?? null;
+  try {
+    const snap = await getDoc(doc(db, "profiles", userId));
+    if (snap.exists()) {
+      return (snap.data()?.["role"] as AppRole) ?? null;
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, `profiles/${userId}`);
+  }
 }
 
-export const authService = { signUp, signIn, signInDemo, resetPassword, fetchRole, ensureProfile, DEMO_ACCOUNTS };
+export const authService = {
+  signInWithGoogle,
+  signInDemo,
+  signOut,
+  fetchRole,
+  ensureProfile,
+  DEMO_ACCOUNTS,
+};

@@ -86,7 +86,12 @@ export function LiveMap({
         <rect width="100%" height="100%" fill="url(#grid)" />
       </svg>
 
-      <svg className="absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+      <svg
+        className="absolute inset-0 size-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
         {path.length > 1 ? (
           <polyline
             points={path.map((p) => `${p.x},${p.y}`).join(" ")}
@@ -172,7 +177,9 @@ export function LiveMap({
         Live location updates · {new Date().toLocaleTimeString()}
       </div>
       {!markers.length ? (
-        <p className="absolute inset-0 grid place-items-center text-sm text-white/70">No active map data</p>
+        <p className="absolute inset-0 grid place-items-center text-sm text-white/70">
+          No active map data
+        </p>
       ) : null}
     </div>
   );

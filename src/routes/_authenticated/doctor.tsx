@@ -12,9 +12,15 @@ export const Route = createFileRoute("/_authenticated/doctor")({
   head: () => ({
     meta: [
       { title: "Doctor console — SmartResponse" },
-      { name: "description", content: "Review incoming patients, AI triage notes and vital context before arrival." },
+      {
+        name: "description",
+        content: "Review incoming patients, AI triage notes and vital context before arrival.",
+      },
       { property: "og:title", content: "Doctor console — SmartResponse" },
-      { property: "og:description", content: "Pre-arrival patient briefing for emergency doctors." },
+      {
+        property: "og:description",
+        content: "Pre-arrival patient briefing for emergency doctors.",
+      },
     ],
   }),
   component: DoctorPage,
@@ -40,9 +46,23 @@ function DoctorPage() {
     <AppShell title="Doctor console">
       <div className="space-y-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard label="Incoming patients" value={incoming.length} icon={HeartPulse} tone="emergency" />
-          <StatsCard label="Critical cases" value={critical.length} icon={Activity} tone="warning" />
-          <StatsCard label="Treated today" value={emergencies.filter((e) => e.status === "COMPLETED").length} icon={Users} />
+          <StatsCard
+            label="Incoming patients"
+            value={incoming.length}
+            icon={HeartPulse}
+            tone="emergency"
+          />
+          <StatsCard
+            label="Critical cases"
+            value={critical.length}
+            icon={Activity}
+            tone="warning"
+          />
+          <StatsCard
+            label="Treated today"
+            value={emergencies.filter((e) => e.status === "COMPLETED").length}
+            icon={Users}
+          />
           <StatsCard label="Hospitals on network" value={hospitals.length} icon={Stethoscope} />
         </div>
 
@@ -100,7 +120,10 @@ function DoctorPage() {
               })}
             </div>
           ) : (
-            <EmptyState title="No incoming patients" description="You will be alerted as soon as a case is routed here." />
+            <EmptyState
+              title="No incoming patients"
+              description="You will be alerted as soon as a case is routed here."
+            />
           )}
         </section>
       </div>

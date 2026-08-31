@@ -11,7 +11,9 @@
 
 import type { PublicEmergency, PublicEmergencyPayload } from "@/types/emergency";
 
-const API_BASE = ((import.meta.env as Record<string, unknown>)["VITE_API_BASE_URL"] as string | undefined) ?? "/api";
+const API_BASE =
+  ((import.meta.env as Record<string, unknown>)["VITE_API_BASE_URL"] as string | undefined) ??
+  "/api";
 
 // ── Human-readable error messages ──────────────────────────────────────────
 
@@ -69,4 +71,3 @@ export async function submitEmergency(payload: PublicEmergencyPayload): Promise<
 }
 
 export const publicEmergencyService = { submitEmergency };
-

@@ -15,7 +15,8 @@ const OPTIONS = [
     icon: Heart,
     title: "I NEED HELP",
     description: "Request emergency assistance for yourself.",
-    accent: "border-emergency/60 hover:border-emergency hover:bg-emergency/5 focus-visible:ring-emergency",
+    accent:
+      "border-emergency/60 hover:border-emergency hover:bg-emergency/5 focus-visible:ring-emergency",
     iconBg: "bg-emergency/10 text-emergency",
   },
   {
@@ -50,7 +51,9 @@ export function EmergencySelector({ onSelect }: Props) {
             )}
             aria-label={title}
           >
-            <span className={cn("mt-0.5 grid size-12 shrink-0 place-items-center rounded-xl", iconBg)}>
+            <span
+              className={cn("mt-0.5 grid size-12 shrink-0 place-items-center rounded-xl", iconBg)}
+            >
               <Icon className="size-6" aria-hidden />
             </span>
             <div className="min-w-0">
@@ -63,4 +66,3 @@ export function EmergencySelector({ onSelect }: Props) {
     </div>
   );
 }
-

@@ -1,0 +1,242 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with application role and contact info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 200 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "tenant_id": { "type": "string", "maxLength": 128 },
+        "role": {
+          "type": "string",
+          "enum": ["PATIENT", "DRIVER", "PARAMEDIC", "DOCTOR", "HOSPITAL", "ADMIN"]
+        },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "email", "role"]
+    },
+    "Tenant": {
+      "title": "Tenant",
+      "description": "Multi-tenant organization or municipal health authority",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "slug": { "type": "string", "maxLength": 100 },
+        "code": { "type": "string", "maxLength": 50 },
+        "region": { "type": "string", "maxLength": 100 },
+        "hotline": { "type": "string", "maxLength": 50 },
+        "center_latitude": { "type": "number" },
+        "center_longitude": { "type": "number" },
+        "zoom": { "type": "number" },
+        "status": { "type": "string", "enum": ["ACTIVE", "MAINTENANCE", "INACTIVE"] },
+        "tier": { "type": "string", "enum": ["MUNICIPAL", "HOSPITAL_NETWORK", "ENTERPRISE"] },
+        "badge_color": { "type": "string", "maxLength": 50 },
+        "created_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "slug", "region", "hotline", "center_latitude", "center_longitude", "status"]
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient medical background and emergency info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "maxLength": 20 },
+        "blood_group": { "type": "string", "maxLength": 10 },
+        "emergency_contact": { "type": "string", "maxLength": 50 },
+        "medical_history": { "type": "string", "maxLength": 500 },
+        "allergies": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "user_id", "name"]
+    },
+    "Emergency": {
+      "title": "Emergency",
+      "description": "Active or historical emergency incident record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "reported_by": { "type": "string", "maxLength": 128 },
+        "patient_id": { "type": "string", "maxLength": 128 },
+        "patient_name": { "type": "string", "maxLength": 100 },
+        "emergency_type": { "type": "string", "maxLength": 50 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "ai_score": { "type": "number" },
+        "ai_reasons": { "type": "array" },
+        "conditions": { "type": "object" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "address": { "type": "string", "maxLength": 300 },
+        "ambulance_id": { "type": "string", "maxLength": 128 },
+        "hospital_id": { "type": "string", "maxLength": 128 },
+        "hospital_reasons": { "type": "array" },
+        "eta_minutes": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "CREATED",
+            "AI_ASSESSED",
+            "AMBULANCE_ASSIGNED",
+            "DRIVER_ACCEPTED",
+            "GOING_TO_PATIENT",
+            "ARRIVED_AT_PATIENT",
+            "PATIENT_ONBOARD",
+            "GOING_TO_HOSPITAL",
+            "ARRIVED_AT_HOSPITAL",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "created_at": { "type": "string", "maxLength": 50 },
+        "accepted_at": { "type": "string", "maxLength": 50 },
+        "pickup_at": { "type": "string", "maxLength": 50 },
+        "hospital_arrival_at": { "type": "string", "maxLength": 50 },
+        "completed_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": [
+        "id",
+        "reported_by",
+        "patient_name",
+        "emergency_type",
+        "severity",
+        "status",
+        "latitude",
+        "longitude"
+      ]
+    },
+    "Ambulance": {
+      "title": "Ambulance",
+      "description": "Ambulance vehicle profile and live operational status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "ambulance_number": { "type": "string", "maxLength": 50 },
+        "driver_id": { "type": "string", "maxLength": 128 },
+        "driver_name": { "type": "string", "maxLength": 100 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "status": {
+          "type": "string",
+          "enum": [
+            "AVAILABLE",
+            "BUSY",
+            "OFFLINE",
+            "EMERGENCY_ASSIGNED",
+            "GOING_TO_PATIENT",
+            "ARRIVED_AT_PATIENT",
+            "PATIENT_ONBOARD",
+            "GOING_TO_HOSPITAL",
+            "ARRIVED_AT_HOSPITAL",
+            "COMPLETED"
+          ]
+        },
+        "ambulance_type": { "type": "string", "enum": ["NORMAL", "ICU", "ADVANCED_LIFE_SUPPORT"] },
+        "equipment": { "type": "array" },
+        "traffic_score": { "type": "number" },
+        "current_case_id": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["id", "ambulance_number", "latitude", "longitude", "status", "ambulance_type"]
+    },
+    "Hospital": {
+      "title": "Hospital",
+      "description": "Hospital medical center capacity and facilities",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "address": { "type": "string", "maxLength": 300 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "phone": { "type": "string", "maxLength": 30 },
+        "available_beds": { "type": "number" },
+        "icu_beds": { "type": "number" },
+        "emergency_available": { "type": "boolean" },
+        "specializations": { "type": "array" },
+        "status": { "type": "string", "enum": ["ACTIVE", "BUSY", "OFFLINE"] }
+      },
+      "required": [
+        "id",
+        "name",
+        "latitude",
+        "longitude",
+        "available_beds",
+        "icu_beds",
+        "emergency_available",
+        "status"
+      ]
+    },
+    "TimelineEvent": {
+      "title": "TimelineEvent",
+      "description": "Audit and event log for an emergency case",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "emergency_id": { "type": "string", "maxLength": 128 },
+        "event": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 500 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "created_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "emergency_id", "event"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Role and user scoped operational notifications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "user_id": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 30 },
+        "emergency_id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 150 },
+        "message": { "type": "string", "maxLength": 500 },
+        "type": { "type": "string", "enum": ["INFO", "SUCCESS", "WARNING", "CRITICAL"] },
+        "read": { "type": "boolean" },
+        "created_at": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "read"]
+    }
+  },
+  "firestore": {
+    "/tenants/{tenantId}": {
+      "schema": "Tenant",
+      "description": "Multi-tenant healthcare organizations and municipal zones"
+    },
+    "/profiles/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles collection indexed by User UID"
+    },
+    "/patients/{patientId}": {
+      "schema": "Patient",
+      "description": "Patient medical background records"
+    },
+    "/emergencies/{emergencyId}": {
+      "schema": "Emergency",
+      "description": "Emergencies collection"
+    },
+    "/ambulances/{ambulanceId}": {
+      "schema": "Ambulance",
+      "description": "Ambulances collection"
+    },
+    "/hospitals/{hospitalId}": {
+      "schema": "Hospital",
+      "description": "Hospitals collection"
+    },
+    "/emergency_timeline/{eventId}": {
+      "schema": "TimelineEvent",
+      "description": "Emergency timeline audit events"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User and role dispatch notifications"
+    }
+  }
+}

@@ -29,8 +29,30 @@ export type EmergencyStatus =
 
 export type AmbulanceType = "NORMAL" | "ICU" | "ADVANCED_LIFE_SUPPORT";
 
+export type TenantTier = "MUNICIPAL" | "HOSPITAL_NETWORK" | "ENTERPRISE";
+
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  code: string;
+  region: string;
+  hotline: string;
+  center_latitude: number;
+  center_longitude: number;
+  zoom?: number;
+  status: "ACTIVE" | "MAINTENANCE" | "INACTIVE";
+  tier?: TenantTier;
+  badge_color?: string;
+  description?: string;
+  total_ambulances?: number;
+  total_hospitals?: number;
+  created_at?: string;
+}
+
 export interface Ambulance {
   id: string;
+  tenant_id?: string;
   ambulance_number: string;
   driver_id: string | null;
   driver_name: string | null;
@@ -45,6 +67,7 @@ export interface Ambulance {
 
 export interface Hospital {
   id: string;
+  tenant_id?: string;
   name: string;
   address: string | null;
   latitude: number;
@@ -76,6 +99,7 @@ export interface EmergencyConditions {
 
 export interface Emergency {
   id: string;
+  tenant_id?: string;
   patient_id: string | null;
   reported_by: string;
   patient_name: string | null;
@@ -103,6 +127,7 @@ export interface Emergency {
 export interface TimelineEvent {
   id: string;
   emergency_id: string;
+  tenant_id?: string;
   event: string;
   description: string | null;
   user_id: string | null;
@@ -111,6 +136,7 @@ export interface TimelineEvent {
 
 export interface AppNotification {
   id: string;
+  tenant_id?: string;
   user_id: string | null;
   role: AppRole | null;
   emergency_id: string | null;

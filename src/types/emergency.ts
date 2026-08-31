@@ -90,4 +90,3 @@ export interface EmergencyDetails extends PublicEmergency {
   hospitalName?: string;
   updatedAt?: string;
 }
-

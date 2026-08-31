@@ -212,8 +212,13 @@ export async function runSOSPipeline(
       });
       markStep("creating", "done");
     } catch (err) {
-      markStep("creating", "failed", err instanceof Error ? err.message : "Failed to create emergency.");
-      state.fatalError = "Cannot connect to the emergency service. Please check your network connection, or call your local emergency number.";
+      markStep(
+        "creating",
+        "failed",
+        err instanceof Error ? err.message : "Failed to create emergency.",
+      );
+      state.fatalError =
+        "Cannot connect to the emergency service. Please check your network connection, or call your local emergency number.";
       emit();
       return;
     }
@@ -231,7 +236,11 @@ export async function runSOSPipeline(
     } catch {
       // AI failure is non-fatal — continue with fallback
       state.aiAssessment = { priority: "HIGH", confidence: 0, fallback: true };
-      markStep("assessing", "skipped", "AI assessment temporarily unavailable. Emergency coordination is continuing.");
+      markStep(
+        "assessing",
+        "skipped",
+        "AI assessment temporarily unavailable. Emergency coordination is continuing.",
+      );
     }
 
     // ── Step 4: Find ambulance candidates ───────────────────────────────
@@ -255,7 +264,11 @@ export async function runSOSPipeline(
       state.ambulanceCandidates = result.candidates;
       markStep("dispatching", "done");
     } catch (err) {
-      markStep("dispatching", "failed", err instanceof Error ? err.message : "Failed to find ambulances.");
+      markStep(
+        "dispatching",
+        "failed",
+        err instanceof Error ? err.message : "Failed to find ambulances.",
+      );
       state.fatalError = err instanceof Error ? err.message : "Unable to locate ambulances.";
       emit();
       return;
@@ -266,20 +279,21 @@ export async function runSOSPipeline(
     checkAbort();
 
     try {
-      state.assignedAmbulance = await apiFetch<AssignedAmbulance>(
-        "/dispatch/assign",
-        {
-          method: "POST",
-          body: {
-            emergencyId: state.emergency.id,
-            ambulanceId: state.ambulanceCandidates?.[0]?.id,
-          },
-          signal,
+      state.assignedAmbulance = await apiFetch<AssignedAmbulance>("/dispatch/assign", {
+        method: "POST",
+        body: {
+          emergencyId: state.emergency.id,
+          ambulanceId: state.ambulanceCandidates?.[0]?.id,
         },
-      );
+        signal,
+      });
       markStep("assigning_ambulance", "done");
     } catch (err) {
-      markStep("assigning_ambulance", "failed", err instanceof Error ? err.message : "Failed to assign ambulance.");
+      markStep(
+        "assigning_ambulance",
+        "failed",
+        err instanceof Error ? err.message : "Failed to assign ambulance.",
+      );
       state.fatalError = err instanceof Error ? err.message : "Unable to assign ambulance.";
       emit();
       return;
@@ -290,23 +304,24 @@ export async function runSOSPipeline(
     checkAbort();
 
     try {
-      const result = await apiFetch<{ candidates: HospitalCandidate[] }>(
-        "/hospitals/recommend",
-        {
-          method: "POST",
-          body: {
-            emergencyId: state.emergency.id,
-            latitude: state.location.latitude,
-            longitude: state.location.longitude,
-            priority: state.aiAssessment?.priority ?? "HIGH",
-          },
-          signal,
+      const result = await apiFetch<{ candidates: HospitalCandidate[] }>("/hospitals/recommend", {
+        method: "POST",
+        body: {
+          emergencyId: state.emergency.id,
+          latitude: state.location.latitude,
+          longitude: state.location.longitude,
+          priority: state.aiAssessment?.priority ?? "HIGH",
         },
-      );
+        signal,
+      });
       state.hospitalCandidates = result.candidates;
       markStep("hospital_search", "done");
     } catch (err) {
-      markStep("hospital_search", "failed", err instanceof Error ? err.message : "Failed to find hospitals.");
+      markStep(
+        "hospital_search",
+        "failed",
+        err instanceof Error ? err.message : "Failed to find hospitals.",
+      );
       state.fatalError = err instanceof Error ? err.message : "Unable to locate hospitals.";
       emit();
       return;
@@ -317,20 +332,21 @@ export async function runSOSPipeline(
     checkAbort();
 
     try {
-      state.assignedHospital = await apiFetch<AssignedHospital>(
-        "/hospitals/assign",
-        {
-          method: "POST",
-          body: {
-            emergencyId: state.emergency.id,
-            hospitalId: state.hospitalCandidates?.[0]?.id,
-          },
-          signal,
+      state.assignedHospital = await apiFetch<AssignedHospital>("/hospitals/assign", {
+        method: "POST",
+        body: {
+          emergencyId: state.emergency.id,
+          hospitalId: state.hospitalCandidates?.[0]?.id,
         },
-      );
+        signal,
+      });
       markStep("assigning_hospital", "done");
     } catch (err) {
-      markStep("assigning_hospital", "failed", err instanceof Error ? err.message : "Failed to assign hospital.");
+      markStep(
+        "assigning_hospital",
+        "failed",
+        err instanceof Error ? err.message : "Failed to assign hospital.",
+      );
       state.fatalError = err instanceof Error ? err.message : "Unable to assign hospital.";
       emit();
       return;

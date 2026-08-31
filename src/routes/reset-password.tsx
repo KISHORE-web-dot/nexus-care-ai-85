@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,7 +14,10 @@ export const Route = createFileRoute("/reset-password")({
       { title: "Reset password — SmartResponse" },
       { name: "description", content: "Choose a new password for your SmartResponse account." },
       { property: "og:title", content: "Reset password — SmartResponse" },
-      { property: "og:description", content: "Set a new password to regain access to your dashboard." },
+      {
+        property: "og:description",
+        content: "Set a new password to regain access to your dashboard.",
+      },
     ],
   }),
   component: ResetPassword,
@@ -44,7 +48,19 @@ function ResetPassword() {
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <form onSubmit={submit} className="card-surface w-full max-w-sm space-y-4 p-6">
-        <h1 className="text-lg font-semibold">Set a new password</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -ml-2 text-muted-foreground hover:text-foreground"
+          >
+            <Link to="/auth">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </Button>
+          <h1 className="text-lg font-semibold">Set a new password</h1>
+        </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">New password</Label>
           <Input id="password" name="password" type="password" required minLength={8} />
@@ -52,6 +68,11 @@ function ResetPassword() {
         <Button type="submit" className="w-full" disabled={busy}>
           Update password
         </Button>
+        <div className="text-center">
+          <Link to="/auth" className="text-xs text-muted-foreground hover:text-foreground">
+            ← Back to sign in
+          </Link>
+        </div>
       </form>
     </main>
   );

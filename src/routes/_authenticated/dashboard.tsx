@@ -110,7 +110,11 @@ function PatientDashboard() {
                 <dt className="text-xs text-muted-foreground">GPS status</dt>
                 <dd className="flex items-center gap-1.5 font-medium">
                   <MapPin className="size-3.5" aria-hidden />
-                  {gps.status === "ok" ? "Location detected" : gps.status === "error" ? "Unavailable" : "Detecting…"}
+                  {gps.status === "ok"
+                    ? "Location detected"
+                    : gps.status === "error"
+                      ? "Unavailable"
+                      : "Detecting…"}
                 </dd>
               </div>
               <div>
@@ -129,7 +133,11 @@ function PatientDashboard() {
               </div>
             </dl>
           </div>
-          <Button asChild variant="destructive" className="animate-sos h-32 w-full text-lg font-bold sm:size-40 sm:rounded-full">
+          <Button
+            asChild
+            variant="destructive"
+            className="animate-sos h-32 w-full text-lg font-bold sm:size-40 sm:rounded-full"
+          >
             <Link to="/sos">
               <span className="flex flex-col items-center gap-1">
                 <Siren className="size-8" aria-hidden />
@@ -154,7 +162,11 @@ function PatientDashboard() {
           icon={AmbulanceIcon}
           hint={ambulance?.ambulance_number ?? "Not assigned"}
         />
-        <StatsCard label="ETA" value={active?.eta_minutes ? `${active.eta_minutes} min` : "—"} icon={Clock} />
+        <StatsCard
+          label="ETA"
+          value={active?.eta_minutes ? `${active.eta_minutes} min` : "—"}
+          icon={Clock}
+        />
         <StatsCard
           label="Recommended hospital"
           value={hospital ? hospital.name.split(" ")[0]! : "—"}
@@ -177,7 +189,9 @@ function PatientDashboard() {
       ) : null}
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Recent emergency history</h3>
+        <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
+          Recent emergency history
+        </h3>
         {isLoading ? (
           <LoadingState />
         ) : history.length ? (
@@ -198,7 +212,10 @@ function PatientDashboard() {
             ))}
           </ul>
         ) : (
-          <EmptyState title="No emergencies yet" description="Your past SOS cases will be listed here." />
+          <EmptyState
+            title="No emergencies yet"
+            description="Your past SOS cases will be listed here."
+          />
         )}
       </section>
     </div>
@@ -217,9 +234,17 @@ function DriverSummary() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard label="Current status" value={mine?.status.replace(/_/g, " ") ?? "Unassigned"} icon={AmbulanceIcon} />
+        <StatsCard
+          label="Current status"
+          value={mine?.status.replace(/_/g, " ") ?? "Unassigned"}
+          icon={AmbulanceIcon}
+        />
         <StatsCard label="Today's emergencies" value={today.length} icon={Activity} />
-        <StatsCard label="Assigned vehicle" value={mine?.ambulance_number ?? "—"} icon={AmbulanceIcon} />
+        <StatsCard
+          label="Assigned vehicle"
+          value={mine?.ambulance_number ?? "—"}
+          icon={AmbulanceIcon}
+        />
         <StatsCard
           label="Open requests"
           value={emergencies.filter((e) => e.status === "AMBULANCE_ASSIGNED").length}
@@ -246,10 +271,19 @@ function HospitalSummary() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard label="Incoming ambulances" value={incoming.length} icon={AmbulanceIcon} tone="emergency" />
+        <StatsCard
+          label="Incoming ambulances"
+          value={incoming.length}
+          icon={AmbulanceIcon}
+          tone="emergency"
+        />
         <StatsCard
           label="Emergency cases today"
-          value={emergencies.filter((e) => new Date(e.created_at).toDateString() === new Date().toDateString()).length}
+          value={
+            emergencies.filter(
+              (e) => new Date(e.created_at).toDateString() === new Date().toDateString(),
+            ).length
+          }
           icon={Activity}
         />
         <StatsCard label="Available beds" value={beds} icon={BedDouble} tone="success" />
@@ -268,7 +302,12 @@ function DoctorSummary() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard label="Incoming patients" value={incoming.length} icon={Stethoscope} tone="emergency" />
+        <StatsCard
+          label="Incoming patients"
+          value={incoming.length}
+          icon={Stethoscope}
+          tone="emergency"
+        />
         <StatsCard
           label="Critical cases"
           value={incoming.filter((e) => e.severity === "CRITICAL").length}
@@ -303,8 +342,18 @@ function AdminSummary() {
         <StatsCard label="Total emergencies" value={a.total} icon={Activity} />
         <StatsCard label="Critical cases" value={a.critical} icon={Siren} tone="emergency" />
         <StatsCard label="Avg response" value={`${a.avgResponseMinutes} min`} icon={Clock} />
-        <StatsCard label="Available ambulances" value={a.availableAmbulances} icon={AmbulanceIcon} tone="success" />
-        <StatsCard label="Busy ambulances" value={a.busyAmbulances} icon={AmbulanceIcon} tone="warning" />
+        <StatsCard
+          label="Available ambulances"
+          value={a.availableAmbulances}
+          icon={AmbulanceIcon}
+          tone="success"
+        />
+        <StatsCard
+          label="Busy ambulances"
+          value={a.busyAmbulances}
+          icon={AmbulanceIcon}
+          tone="warning"
+        />
         <StatsCard label="Hospitals connected" value={a.hospitalsConnected} icon={HospitalIcon} />
       </div>
       <Button asChild>

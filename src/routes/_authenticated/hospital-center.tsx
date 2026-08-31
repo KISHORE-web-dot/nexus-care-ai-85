@@ -12,16 +12,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { supabase } from "@/integrations/supabase/client";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { handleFirestoreError, OperationType } from "@/lib/firestoreErrors";
 import { useAmbulances, useEmergencies, useHospitals } from "@/hooks/useEmergencyData";
 
 export const Route = createFileRoute("/_authenticated/hospital-center")({
   head: () => ({
     meta: [
       { title: "Hospital command centre — SmartResponse" },
-      { name: "description", content: "Track incoming patients and keep bed, ICU and emergency capacity up to date." },
+      {
+        name: "description",
+        content: "Track incoming patients and keep bed, ICU and emergency capacity up to date.",
+      },
       { property: "og:title", content: "Hospital command centre — SmartResponse" },
-      { property: "og:description", content: "Live incoming patients and hospital resource management." },
+      {
+        property: "og:description",
+        content: "Live incoming patients and hospital resource management.",
+      },
     ],
   }),
   component: HospitalCenterPage,
@@ -40,14 +48,19 @@ function HospitalCenterPage() {
 
   const update = async (id: string, patch: Record<string, unknown>) => {
     setSaving(id);
-    const { error } = await supabase.from("hospitals").update(patch as never).eq("id", id);
-    setSaving(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await updateDoc(doc(db, "hospitals", id), patch);
+      toast.success("Hospital capacity updated");
+      queryClient.invalidateQueries({ queryKey: ["hospitals"] });
+    } catch (error) {
+      try {
+        handleFirestoreError(error, OperationType.UPDATE, `hospitals/${id}`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to update hospital");
+      }
+    } finally {
+      setSaving(null);
     }
-    queryClient.invalidateQueries({ queryKey: ["hospitals"] });
-    toast.success("Hospital capacity updated");
   };
 
   if (isLoading) {
@@ -62,13 +75,22 @@ function HospitalCenterPage() {
     <AppShell title="Hospital command centre">
       <div className="space-y-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard label="Incoming patients" value={incoming.length} icon={HeartPulse} tone="emergency" />
+          <StatsCard
+            label="Incoming patients"
+            value={incoming.length}
+            icon={HeartPulse}
+            tone="emergency"
+          />
           <StatsCard
             label="Available beds"
             value={hospitals.reduce((s, h) => s + h.available_beds, 0)}
             icon={BedDouble}
           />
-          <StatsCard label="ICU beds" value={hospitals.reduce((s, h) => s + h.icu_beds, 0)} icon={Stethoscope} />
+          <StatsCard
+            label="ICU beds"
+            value={hospitals.reduce((s, h) => s + h.icu_beds, 0)}
+            icon={Stethoscope}
+          />
           <StatsCard label="Connected hospitals" value={hospitals.length} icon={HospitalIcon} />
         </div>
 
@@ -91,7 +113,10 @@ function HospitalCenterPage() {
               />
             ))
           ) : (
-            <EmptyState title="No incoming patients" description="Assigned emergencies will show up here live." />
+            <EmptyState
+              title="No incoming patients"
+              description="Assigned emergencies will show up here live."
+            />
           )}
         </section>
 
@@ -142,7 +167,10 @@ function HospitalCenterPage() {
                 </div>
                 <ul className="flex flex-wrap gap-1.5">
                   {h.specializations.map((s) => (
-                    <li key={s} className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+                    <li
+                      key={s}
+                      className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+                    >
                       {s}
                     </li>
                   ))}

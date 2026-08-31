@@ -1,24 +1,40 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { collection, onSnapshot } from "firebase/firestore";
 import { useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { handleFirestoreError, OperationType } from "@/lib/firestoreErrors";
 
-import { supabase } from "@/integrations/supabase/client";
+const COLLECTIONS = [
+  "emergencies",
+  "ambulances",
+  "hospitals",
+  "notifications",
+  "emergency_timeline",
+];
 
-const TABLES = ["emergencies", "ambulances", "hospitals", "notifications", "emergency_timeline"];
-
-/** Keeps every dashboard in sync with the shared emergency record. */
+/** Keeps every dashboard in sync with the shared emergency record via Firestore real-time snapshots. */
 export function useRealtimeSync() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const channel = supabase.channel("emergency-sync");
-    TABLES.forEach((table) => {
-      channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
-        queryClient.invalidateQueries();
-      });
+    const unsubscribes = COLLECTIONS.map((collName) => {
+      return onSnapshot(
+        collection(db, collName),
+        () => {
+          queryClient.invalidateQueries();
+        },
+        (error) => {
+          try {
+            handleFirestoreError(error, OperationType.LIST, collName);
+          } catch (e) {
+            console.warn(`Firestore real-time subscription error on ${collName}:`, e);
+          }
+        },
+      );
     });
-    channel.subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      unsubscribes.forEach((unsub) => unsub());
     };
   }, [queryClient]);
 }

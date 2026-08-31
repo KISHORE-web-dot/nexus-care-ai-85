@@ -650,7 +650,6 @@ score
 reasons[]
 confidence
 
-
 Do not present the score as a medical diagnosis.
 
 14. AMBULANCE DISPATCH
@@ -972,7 +971,6 @@ hospital
 score
 distance
 reasons[]
-
 
 Example:
 

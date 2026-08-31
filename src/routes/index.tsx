@@ -40,29 +40,89 @@ export const Route = createFileRoute("/")({
 
 const STEPS = [
   { icon: Siren, title: "SOS", text: "One press captures GPS location and emergency details." },
-  { icon: BrainCircuit, title: "AI Assessment", text: "Deterministic triage engine assigns case priority." },
-  { icon: Ambulance, title: "Smart Dispatch", text: "Weighted scoring picks the most suitable ambulance." },
+  {
+    icon: BrainCircuit,
+    title: "AI Assessment",
+    text: "Deterministic triage engine assigns case priority.",
+  },
+  {
+    icon: Ambulance,
+    title: "Smart Dispatch",
+    text: "Weighted scoring picks the most suitable ambulance.",
+  },
   { icon: Radio, title: "Live Tracking", text: "Patients and family follow every status change." },
-  { icon: Hospital, title: "Hospital Match", text: "Beds, ICU and specialisation decide the destination." },
-  { icon: Stethoscope, title: "Medical Handover", text: "Doctors see history, vitals context and timeline." },
+  {
+    icon: Hospital,
+    title: "Hospital Match",
+    text: "Beds, ICU and specialisation decide the destination.",
+  },
+  {
+    icon: Stethoscope,
+    title: "Medical Handover",
+    text: "Doctors see history, vitals context and timeline.",
+  },
 ];
 
 const FEATURES = [
-  { icon: BrainCircuit, title: "AI Emergency Priority", text: "Explainable LOW → CRITICAL scoring with reasons." },
-  { icon: Ambulance, title: "Smart Ambulance Dispatch", text: "Distance, traffic, capability and severity weighted." },
+  {
+    icon: BrainCircuit,
+    title: "AI Emergency Priority",
+    text: "Explainable LOW → CRITICAL scoring with reasons.",
+  },
+  {
+    icon: Ambulance,
+    title: "Smart Ambulance Dispatch",
+    text: "Distance, traffic, capability and severity weighted.",
+  },
   { icon: MapPin, title: "GPS Tracking", text: "Browser geolocation with manual fallback entry." },
-  { icon: Building2, title: "Hospital Recommendation", text: "ICU, beds, specialisation and travel time." },
-  { icon: BellRing, title: "Real-Time Notifications", text: "Role-targeted alerts with unread counts." },
-  { icon: ClipboardList, title: "Emergency Timeline", text: "Every action audited from SOS to handover." },
-  { icon: Hospital, title: "Hospital Availability", text: "Staff update capacity; dispatch reacts instantly." },
+  {
+    icon: Building2,
+    title: "Hospital Recommendation",
+    text: "ICU, beds, specialisation and travel time.",
+  },
+  {
+    icon: BellRing,
+    title: "Real-Time Notifications",
+    text: "Role-targeted alerts with unread counts.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Emergency Timeline",
+    text: "Every action audited from SOS to handover.",
+  },
+  {
+    icon: Hospital,
+    title: "Hospital Availability",
+    text: "Staff update capacity; dispatch reacts instantly.",
+  },
   { icon: Activity, title: "Analytics", text: "Operations dashboard with live charts and tables." },
 ];
 
 const WALKTHROUGH_STEPS = [
-  { label: "SOS received", meta: "Road accident · Coimbatore", tone: "bg-emergency", dotPulse: true },
-  { label: "AI priority: CRITICAL", meta: "Unconscious · heavy bleeding", tone: "bg-warning", dotPulse: false },
-  { label: "TN38AB1234 dispatched", meta: "ICU ambulance · ETA 7 min", tone: "bg-primary", dotPulse: false },
-  { label: "Hospital selected", meta: "Trauma + ICU available", tone: "bg-success", dotPulse: false },
+  {
+    label: "SOS received",
+    meta: "Road accident · Coimbatore",
+    tone: "bg-emergency",
+    dotPulse: true,
+  },
+  {
+    label: "AI priority: CRITICAL",
+    meta: "Unconscious · heavy bleeding",
+    tone: "bg-warning",
+    dotPulse: false,
+  },
+  {
+    label: "TN38AB1234 dispatched",
+    meta: "ICU ambulance · ETA 7 min",
+    tone: "bg-primary",
+    dotPulse: false,
+  },
+  {
+    label: "Hospital selected",
+    meta: "Trauma + ICU available",
+    tone: "bg-success",
+    dotPulse: false,
+  },
 ] as const;
 
 function HeroWalkthrough() {
@@ -89,7 +149,10 @@ function HeroWalkthrough() {
             <button
               key={i}
               type="button"
-              onClick={() => { setActiveStep(i); setVisible(true); }}
+              onClick={() => {
+                setActiveStep(i);
+                setVisible(true);
+              }}
               aria-label={`Jump to step ${i + 1}`}
               className={cn(
                 "size-1.5 rounded-full transition-all duration-300",
@@ -138,7 +201,6 @@ function HeroWalkthrough() {
   );
 }
 
-
 function Landing() {
   return (
     <div className="min-h-screen bg-background">
@@ -153,9 +215,7 @@ function Landing() {
               <Link to="/auth">Login</Link>
             </Button>
             <Button asChild size="sm">
-              <Link to="/auth">
-                View demo
-              </Link>
+              <Link to="/auth">View demo</Link>
             </Button>
           </nav>
         </div>
@@ -165,7 +225,8 @@ function Landing() {
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
-              <ShieldCheck className="size-3.5" aria-hidden /> Educational prototype · simulated data
+              <ShieldCheck className="size-3.5" aria-hidden /> Educational prototype · simulated
+              data
             </p>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
               AI-Powered Smart Emergency Response
@@ -228,9 +289,9 @@ function Landing() {
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-10 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Disclaimer</p>
           <p>
-            Prototype for educational and demonstration purposes. AI recommendations are decision support
-            and do not replace professional medical judgment. This system is not a certified emergency
-            dispatch service — in a real emergency, call your local emergency number.
+            Prototype for educational and demonstration purposes. AI recommendations are decision
+            support and do not replace professional medical judgment. This system is not a certified
+            emergency dispatch service — in a real emergency, call your local emergency number.
           </p>
         </div>
       </footer>

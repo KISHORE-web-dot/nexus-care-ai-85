@@ -1,8 +1,9 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   Ambulance,
+  ArrowLeft,
   Bell,
   Building2,
   ClipboardList,
@@ -26,6 +27,7 @@ import { useRealtimeSync } from "@/hooks/useRealtime";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/lib/types";
 import { listNotifications } from "@/services/notificationService";
+import { TenantSwitcher } from "./TenantSwitcher";
 
 interface NavItem {
   to: string;
@@ -120,12 +122,36 @@ function Brand() {
   );
 }
 
-export function AppShell({ title, children }: { title: string; children: ReactNode }) {
+export function AppShell({
+  title,
+  showBack,
+  backTo,
+  children,
+}: {
+  title: string;
+  showBack?: boolean;
+  backTo?: string;
+  children: ReactNode;
+}) {
   useRealtimeSync();
   const { role, name, signOut } = useAuth();
   const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const activeRole = (role ?? "PATIENT") as AppRole;
+
+  const isDetailPage = showBack ?? (pathname !== "/dashboard" && pathname !== "/");
+
+  const handleBack = () => {
+    if (backTo) {
+      navigate({ to: backTo });
+    } else if (window.history.length > 1) {
+      router.history.back();
+    } else {
+      navigate({ to: "/dashboard" });
+    }
+  };
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
@@ -142,6 +168,9 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 flex-col bg-sidebar p-3 lg:flex">
         <Brand />
+        <div className="mb-3 px-1">
+          <TenantSwitcher className="w-full bg-sidebar-accent/50 border-sidebar-border" />
+        </div>
         <NavList role={activeRole} />
         <div className="mt-auto space-y-2 p-2">
           <p className="rounded-md bg-sidebar-accent px-3 py-2 text-[11px] text-sidebar-accent-foreground/80">
@@ -152,15 +181,35 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/90 px-4 py-3 backdrop-blur">
+          {isDetailPage ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="h-8 w-8 shrink-0 rounded-lg hover:bg-accent"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+          ) : null}
+
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden shrink-0"
+                aria-label="Open navigation"
+              >
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 bg-sidebar p-3">
+            <SheetContent side="left" className="w-72 bg-sidebar p-3">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <Brand />
+              <div className="mb-3 px-1">
+                <TenantSwitcher className="w-full bg-sidebar-accent/50 border-sidebar-border" />
+              </div>
               <NavList role={activeRole} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
@@ -172,8 +221,18 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             </p>
           </div>
 
+          <div className="hidden md:flex ml-4 max-w-xs">
+            <TenantSwitcher />
+          </div>
+
           <div className="ml-auto flex items-center gap-1">
-            <Button asChild variant="ghost" size="icon" className="relative" aria-label="Notifications">
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="relative"
+              aria-label="Notifications"
+            >
               <Link to="/notifications">
                 <Bell className="size-5" />
                 {unread > 0 ? (

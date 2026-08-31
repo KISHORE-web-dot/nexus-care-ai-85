@@ -6,7 +6,7 @@ export interface LocationResult extends LatLng {
   source: "gps" | "manual" | "fallback";
 }
 
-export const FALLBACK_LOCATION: LatLng = { latitude: 11.0168, longitude: 76.9558 };
+export const FALLBACK_LOCATION: LatLng = { latitude: 18.9388, longitude: 72.8311 };
 
 export function getCurrentLocation(timeoutMs = 10000): Promise<LocationResult> {
   return new Promise((resolve, reject) => {

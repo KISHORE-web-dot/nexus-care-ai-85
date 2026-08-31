@@ -12,9 +12,10 @@
  */
 
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Loader2, Phone, Siren } from "lucide-react";
+import { ArrowLeft, Loader2, Phone, Siren } from "lucide-react";
 import { useCallback, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { EmergencySelector } from "@/components/emergency/EmergencySelector";
 import { SOSButton } from "@/components/emergency/SOSButton";
@@ -54,13 +55,13 @@ export const Route = createFileRoute("/emergency")({
 
 type Phase =
   | "selector"
-  | "sos-button"      // Patient: press-and-hold SOS
-  | "activation"      // Patient: automatic pipeline running / dashboard
-  | "bystander"       // Bystander: 4-question flow
-  | "location"        // Bystander: GPS step
-  | "review"          // Bystander: pre-submit review
-  | "submitting"      // Bystander: sending
-  | "status";         // Bystander: post-submit status
+  | "sos-button" // Patient: press-and-hold SOS
+  | "activation" // Patient: automatic pipeline running / dashboard
+  | "bystander" // Bystander: 4-question flow
+  | "location" // Bystander: GPS step
+  | "review" // Bystander: pre-submit review
+  | "submitting" // Bystander: sending
+  | "status"; // Bystander: post-submit status
 
 // Progress percentage per phase and source
 function computeProgress(phase: Phase, source: EmergencySource | null): number {
@@ -70,7 +71,14 @@ function computeProgress(phase: Phase, source: EmergencySource | null): number {
     if (idx < 0) return 100;
     return Math.round(((idx + 1) / patientPhases.length) * 100);
   }
-  const bystanderPhases: Phase[] = ["selector", "bystander", "location", "review", "submitting", "status"];
+  const bystanderPhases: Phase[] = [
+    "selector",
+    "bystander",
+    "location",
+    "review",
+    "submitting",
+    "status",
+  ];
   const idx = bystanderPhases.indexOf(phase);
   if (idx < 0) return 0;
   return Math.round(((idx + 1) / bystanderPhases.length) * 100);
@@ -125,7 +133,9 @@ function EmergencyPage() {
       setSubmittedEmergency(result);
       setPhase("status");
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.");
+      setSubmitError(
+        err instanceof Error ? err.message : "An unexpected error occurred. Please try again.",
+      );
       setPhase("review");
     }
   }, [bystanderData, location]);
@@ -137,7 +147,37 @@ function EmergencyPage() {
       {/* ── Public header ────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md">
+          {phase === "selector" ? (
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 -ml-2 text-muted-foreground hover:text-foreground"
+            >
+              <Link to="/">
+                <ArrowLeft className="size-4" />
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 -ml-2 text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                if (phase === "sos-button" || phase === "bystander") setPhase("selector");
+                else if (phase === "location") setPhase("bystander");
+                else if (phase === "review") setPhase("location");
+                else if (phase === "activation") setPhase("sos-button");
+                else setPhase("selector");
+              }}
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+          )}
+          <Link
+            to="/"
+            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
+          >
             <span className="grid size-8 place-items-center rounded-lg bg-emergency text-emergency-foreground">
               <Siren className="size-4" aria-hidden />
             </span>
@@ -169,8 +209,8 @@ function EmergencyPage() {
           >
             <Phone className="mt-0.5 size-4 shrink-0 text-emergency" aria-hidden />
             <p className="text-muted-foreground">
-              <strong className="text-emergency">Real emergency?</strong> Call your local emergency number
-              (112 / 911) immediately. This system is an educational prototype.
+              <strong className="text-emergency">Real emergency?</strong> Call your local emergency
+              number (112 / 911) immediately. This system is an educational prototype.
             </p>
           </div>
         )}
@@ -192,8 +232,8 @@ function EmergencyPage() {
             <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold tracking-tight">Emergency SOS</h1>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Press and hold the SOS button to activate emergency assistance.
-                Your location will be automatically detected and help will be coordinated.
+                Press and hold the SOS button to activate emergency assistance. Your location will
+                be automatically detected and help will be coordinated.
               </p>
             </div>
 
@@ -210,9 +250,7 @@ function EmergencyPage() {
         )}
 
         {/* ── Patient: Activation (automatic pipeline) ────────────────────── */}
-        {phase === "activation" && (
-          <EmergencyActivation onBack={() => setPhase("sos-button")} />
-        )}
+        {phase === "activation" && <EmergencyActivation onBack={() => setPhase("sos-button")} />}
 
         {/* ── Bystander questions ─────────────────────────────────────────── */}
         {phase === "bystander" && (
@@ -242,7 +280,9 @@ function EmergencyPage() {
             source={source}
             bystanderData={bystanderData}
             location={location}
-            onSubmit={() => { void handleSubmit(); }}
+            onSubmit={() => {
+              void handleSubmit();
+            }}
             onCancel={() => setPhase("location")}
             submitError={submitError}
           />
@@ -250,13 +290,19 @@ function EmergencyPage() {
 
         {/* ── Bystander: Submitting (loading) ─────────────────────────────── */}
         {phase === "submitting" && (
-          <div className="flex flex-col items-center justify-center gap-5 py-20" role="status" aria-live="polite">
+          <div
+            className="flex flex-col items-center justify-center gap-5 py-20"
+            role="status"
+            aria-live="polite"
+          >
             <span className="grid size-20 place-items-center rounded-full bg-emergency/10">
               <Loader2 className="size-10 animate-spin text-emergency" aria-hidden />
             </span>
             <div className="text-center space-y-1">
               <p className="text-lg font-bold">Sending emergency request…</p>
-              <p className="text-sm text-muted-foreground">Please do not close or refresh this page.</p>
+              <p className="text-sm text-muted-foreground">
+                Please do not close or refresh this page.
+              </p>
             </div>
           </div>
         )}

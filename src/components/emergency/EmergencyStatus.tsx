@@ -43,7 +43,9 @@ export function EmergencyStatus({ emergency, location }: Props) {
 
       {/* Emergency ID — prominent */}
       <div className="card-surface rounded-xl px-6 py-5 text-center">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Emergency ID</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          Emergency ID
+        </p>
         <p className="mt-1 text-3xl font-bold font-mono tracking-widest text-foreground">
           {emergency.id}
         </p>
@@ -54,15 +56,13 @@ export function EmergencyStatus({ emergency, location }: Props) {
       <div className="card-surface divide-y divide-border rounded-xl overflow-hidden">
         <Detail label="Request source" value={sourceLabel(emergency.source)} />
         <Detail label="Emergency type" value={emergency.emergencyType} />
-        <Detail
-          label="Current status"
-          value={statusLabel(emergency.status)}
-          badge
-        />
+        <Detail label="Current status" value={statusLabel(emergency.status)} badge />
         <div className="flex items-start gap-3 px-5 py-4">
           <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Location</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Location
+            </p>
             <p className="mt-0.5 text-sm font-medium">
               {location.source === "gps" ? "Current location (GPS)" : "Manually entered"}
             </p>
@@ -87,8 +87,8 @@ export function EmergencyStatus({ emergency, location }: Props) {
         </h2>
         <EmergencyTimeline emergency={emergency} />
         <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-          The timeline will update as the emergency is processed. Refresh this page or connect to the
-          live dashboard for real-time updates.
+          The timeline will update as the emergency is processed. Refresh this page or connect to
+          the live dashboard for real-time updates.
         </p>
       </section>
 
@@ -98,16 +98,16 @@ export function EmergencyStatus({ emergency, location }: Props) {
         <div className="text-sm">
           <p className="font-semibold text-emergency">Stay safe</p>
           <p className="mt-0.5 text-muted-foreground">
-            If the situation worsens, call your local emergency number (112 / 911) immediately. Do not rely
-            solely on this application.
+            If the situation worsens, call your local emergency number (112 / 911) immediately. Do
+            not rely solely on this application.
           </p>
         </div>
       </div>
 
       {/* Disclaimer */}
       <p className="text-center text-xs text-muted-foreground pb-4">
-        This is an educational prototype. Emergency responses shown here use simulated data and are not
-        connected to real emergency services.
+        This is an educational prototype. Emergency responses shown here use simulated data and are
+        not connected to real emergency services.
       </p>
     </div>
   );
@@ -137,4 +137,3 @@ function Detail({
     </div>
   );
 }
-

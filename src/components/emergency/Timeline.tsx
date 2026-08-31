@@ -21,7 +21,12 @@ const LABELS: Record<string, string> = {
 
 export function Timeline({ events }: { events: TimelineEvent[] }) {
   if (!events.length) {
-    return <EmptyState title="No timeline events yet" description="Events appear here as the case progresses." />;
+    return (
+      <EmptyState
+        title="No timeline events yet"
+        description="Events appear here as the case progresses."
+      />
+    );
   }
 
   return (
@@ -32,12 +37,21 @@ export function Timeline({ events }: { events: TimelineEvent[] }) {
         return (
           <li key={e.id} className="relative">
             <span className="absolute top-0.5 -left-6 text-primary">
-              {last ? <Circle className="size-4 fill-primary/20" /> : <CheckCircle2 className="size-4" />}
+              {last ? (
+                <Circle className="size-4 fill-primary/20" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
             </span>
             <p className="text-sm font-medium">{LABELS[e.event] ?? e.event.replace(/_/g, " ")}</p>
-            {e.description ? <p className="text-sm text-muted-foreground">{e.description}</p> : null}
+            {e.description ? (
+              <p className="text-sm text-muted-foreground">{e.description}</p>
+            ) : null}
             <time className="text-xs text-muted-foreground" dateTime={e.created_at}>
-              {new Date(e.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {new Date(e.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </time>
           </li>
         );

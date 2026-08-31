@@ -17,7 +17,10 @@ export const Route = createFileRoute("/_authenticated/requests")({
   head: () => ({
     meta: [
       { title: "Ambulance requests — SmartResponse" },
-      { name: "description", content: "Accept dispatch requests and advance the emergency journey step by step." },
+      {
+        name: "description",
+        content: "Accept dispatch requests and advance the emergency journey step by step.",
+      },
       { property: "og:title", content: "Ambulance requests — SmartResponse" },
       { property: "og:description", content: "Driver and paramedic response queue." },
     ],
@@ -46,13 +49,18 @@ function RequestsPage() {
 
   useEffect(() => {
     if (!user || myAmbulance || !ambulances.length) return;
-    void claimAmbulanceForDriver(user.id, name).then(() => queryClient.invalidateQueries({ queryKey: ["ambulances"] }));
+    void claimAmbulanceForDriver(user.id, name).then(() =>
+      queryClient.invalidateQueries({ queryKey: ["ambulances"] }),
+    );
   }, [user, name, myAmbulance, ambulances.length, queryClient]);
 
-  const mine = (emergencies ?? []).filter((e) => e.ambulance_id && e.ambulance_id === myAmbulance?.id);
+  const mine = (emergencies ?? []).filter(
+    (e) => e.ambulance_id && e.ambulance_id === myAmbulance?.id,
+  );
   const incoming = mine.filter((e) => e.status === "AMBULANCE_ASSIGNED");
   const active = mine.filter(
-    (e) => e.status !== "AMBULANCE_ASSIGNED" && e.status !== "COMPLETED" && e.status !== "CANCELLED",
+    (e) =>
+      e.status !== "AMBULANCE_ASSIGNED" && e.status !== "COMPLETED" && e.status !== "CANCELLED",
   );
   const done = mine.filter((e) => e.status === "COMPLETED");
 
@@ -107,14 +115,18 @@ function RequestsPage() {
                 <div className="flex gap-2">
                   <Button
                     disabled={busy}
-                    onClick={() => run(() => advanceStatus(e, "DRIVER_ACCEPTED", user?.id), "Request accepted")}
+                    onClick={() =>
+                      run(() => advanceStatus(e, "DRIVER_ACCEPTED", user?.id), "Request accepted")
+                    }
                   >
                     Accept
                   </Button>
                   <Button
                     variant="outline"
                     disabled={busy}
-                    onClick={() => run(() => rejectAssignment(e, myAmbulance!.id), "Request rejected")}
+                    onClick={() =>
+                      run(() => rejectAssignment(e, myAmbulance!.id), "Request rejected")
+                    }
                   >
                     Reject
                   </Button>
@@ -122,12 +134,17 @@ function RequestsPage() {
               ),
             )
           ) : (
-            <EmptyState title="No pending requests" description="New dispatches appear here instantly." />
+            <EmptyState
+              title="No pending requests"
+              description="New dispatches appear here instantly."
+            />
           )}
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted-foreground">Active trip ({active.length})</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            Active trip ({active.length})
+          </h2>
           {active.length ? (
             active.map((e) => {
               const next = nextFor(e);
@@ -149,7 +166,10 @@ function RequestsPage() {
               );
             })
           ) : (
-            <EmptyState title="No active trip" description="Accept a request to begin the response journey." />
+            <EmptyState
+              title="No active trip"
+              description="Accept a request to begin the response journey."
+            />
           )}
         </section>
 

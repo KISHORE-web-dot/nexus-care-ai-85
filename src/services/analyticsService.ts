@@ -70,7 +70,8 @@ export function buildAnalytics(
       ? Number((responses.reduce((a, b) => a + b, 0) / responses.length).toFixed(1))
       : 0,
     availableAmbulances: ambulances.filter((a) => a.status === "AVAILABLE").length,
-    busyAmbulances: ambulances.filter((a) => a.status !== "AVAILABLE" && a.status !== "OFFLINE").length,
+    busyAmbulances: ambulances.filter((a) => a.status !== "AVAILABLE" && a.status !== "OFFLINE")
+      .length,
     hospitalsConnected: hospitals.length,
     byType: count(emergencies.map((e) => e.emergency_type)),
     byPriority: count(emergencies.map((e) => e.severity)),

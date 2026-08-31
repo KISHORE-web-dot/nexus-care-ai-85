@@ -28,7 +28,14 @@ function consciousnessLabel(c: BystanderFormData["consciousness"]): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function EmergencyReview({ source, bystanderData, location, onSubmit, onCancel, submitError }: Props) {
+export function EmergencyReview({
+  source,
+  bystanderData,
+  location,
+  onSubmit,
+  onCancel,
+  submitError,
+}: Props) {
   return (
     <div className="space-y-5">
       <div>
@@ -40,7 +47,10 @@ export function EmergencyReview({ source, bystanderData, location, onSubmit, onC
 
       {/* Summary card */}
       <div className="card-surface divide-y divide-border rounded-2xl overflow-hidden">
-        <Row label="Request type" value={source === "PATIENT" ? "I NEED HELP (Patient SOS)" : "HELP SOMEONE (Bystander)"} />
+        <Row
+          label="Request type"
+          value={source === "PATIENT" ? "I NEED HELP (Patient SOS)" : "HELP SOMEONE (Bystander)"}
+        />
 
         {source === "BYSTANDER" && bystanderData ? (
           <>
@@ -52,7 +62,11 @@ export function EmergencyReview({ source, bystanderData, location, onSubmit, onC
             <Row label="Incident" value={bystanderData.emergencyType} />
             <Row
               label="People affected"
-              value={bystanderData.peopleAffected === 1 ? "1 person" : `${bystanderData.peopleAffected} people`}
+              value={
+                bystanderData.peopleAffected === 1
+                  ? "1 person"
+                  : `${bystanderData.peopleAffected} people`
+              }
             />
             {bystanderData.description && (
               <Row label="Additional info" value={bystanderData.description} multiline />
@@ -65,9 +79,13 @@ export function EmergencyReview({ source, bystanderData, location, onSubmit, onC
         <div className="flex items-start gap-3 px-5 py-4">
           <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Location</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Location
+            </p>
             <p className="mt-0.5 text-sm font-medium">
-              {location.source === "gps" ? "📍 Current location detected" : "📍 Manually entered location"}
+              {location.source === "gps"
+                ? "📍 Current location detected"
+                : "📍 Manually entered location"}
             </p>
             {location.address ? (
               <p className="text-xs text-muted-foreground">{location.address}</p>
@@ -85,8 +103,8 @@ export function EmergencyReview({ source, bystanderData, location, onSubmit, onC
 
       {/* Safety disclaimer */}
       <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-warning-foreground">
-        ⚠️ This is an educational prototype — not a certified emergency service. For real emergencies,
-        always call your local emergency number (112 / 911) immediately.
+        ⚠️ This is an educational prototype — not a certified emergency service. For real
+        emergencies, always call your local emergency number (112 / 911) immediately.
       </p>
 
       {/* Previous submission error */}
@@ -154,4 +172,3 @@ function Row({
     </div>
   );
 }
-

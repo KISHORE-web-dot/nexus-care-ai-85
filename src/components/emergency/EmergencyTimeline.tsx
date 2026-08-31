@@ -79,7 +79,10 @@ export function EmergencyTimeline({ emergency }: { emergency: PublicEmergency })
             {step.state === "done" ? (
               <CheckCircle2 className="size-5 text-success" aria-label="Completed" />
             ) : step.state === "active" ? (
-              <Circle className="size-5 animate-pulse fill-primary/20 text-primary" aria-label="In progress" />
+              <Circle
+                className="size-5 animate-pulse fill-primary/20 text-primary"
+                aria-label="In progress"
+              />
             ) : (
               <Clock className="size-5 text-muted-foreground/50" aria-label="Pending" />
             )}
@@ -104,4 +107,3 @@ export function EmergencyTimeline({ emergency }: { emergency: PublicEmergency })
     </ol>
   );
 }
-

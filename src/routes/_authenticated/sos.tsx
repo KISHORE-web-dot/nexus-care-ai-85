@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useAmbulances, useHospitals, usePatientProfile } from "@/hooks/useEmergencyData";
+import { useTenant } from "@/hooks/useTenant";
 import { EMERGENCY_TYPES, type Emergency, type EmergencyConditions } from "@/lib/types";
 import { assessEmergency, type AIAssessment } from "@/services/aiPriorityService";
 import { rankAmbulances, type AmbulanceCandidate } from "@/services/ambulanceService";
@@ -34,9 +35,15 @@ export const Route = createFileRoute("/_authenticated/sos")({
   head: () => ({
     meta: [
       { title: "Emergency SOS — SmartResponse" },
-      { name: "description", content: "Create an emergency case with GPS location, AI triage and ambulance dispatch." },
+      {
+        name: "description",
+        content: "Create an emergency case with GPS location, AI triage and ambulance dispatch.",
+      },
       { property: "og:title", content: "Emergency SOS — SmartResponse" },
-      { property: "og:description", content: "Request emergency assistance in a guided four-step flow." },
+      {
+        property: "og:description",
+        content: "Request emergency assistance in a guided four-step flow.",
+      },
     ],
   }),
   component: SosPage,
@@ -61,6 +68,7 @@ const CONDITION_FIELDS: { key: keyof EmergencyConditions; label: string }[] = [
 
 function SosPage() {
   const { user, name } = useAuth();
+  const { activeTenant, activeTenantId } = useTenant();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: patient } = usePatientProfile(user?.id);
@@ -74,7 +82,10 @@ function SosPage() {
   const [address, setAddress] = useState<string>("");
 
   const [emergencyType, setEmergencyType] = useState<string>("Road Accident");
-  const [conditions, setConditions] = useState<EmergencyConditions>({ conscious: true, injuredCount: 1 });
+  const [conditions, setConditions] = useState<EmergencyConditions>({
+    conscious: true,
+    injuredCount: 1,
+  });
   const [description, setDescription] = useState("");
 
   const [assessment, setAssessment] = useState<AIAssessment | null>(null);
@@ -123,6 +134,7 @@ function SosPage() {
         latitude: coords.latitude,
         longitude: coords.longitude,
         address,
+        tenantId: activeTenantId,
         assessment: result,
       });
       setEmergency(created);
@@ -169,12 +181,21 @@ function SosPage() {
           <section className="card-surface space-y-4 p-6">
             <h2 className="flex items-center gap-2 text-lg font-semibold">
               <MapPin className="size-5 text-primary" aria-hidden />
-              {locating ? "Detecting your location…" : locationError ? "Location needed" : "Location detected ✓"}
+              {locating
+                ? "Detecting your location…"
+                : locationError
+                  ? "Location needed"
+                  : "Location detected ✓"}
             </h2>
-            {locating ? <p className="text-sm text-muted-foreground">Requesting GPS permission…</p> : null}
+            {locating ? (
+              <p className="text-sm text-muted-foreground">Requesting GPS permission…</p>
+            ) : null}
             {locationError ? (
               <div className="space-y-4">
-                <ErrorState message={`${locationError} Enter the location manually to continue.`} onRetry={detect} />
+                <ErrorState
+                  message={`${locationError} Enter the location manually to continue.`}
+                  onRetry={detect}
+                />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="lat">Latitude</Label>
@@ -183,7 +204,10 @@ function SosPage() {
                       type="number"
                       step="any"
                       onChange={(e) =>
-                        setCoords((c) => ({ latitude: Number(e.target.value), longitude: c?.longitude ?? 0 }))
+                        setCoords((c) => ({
+                          latitude: Number(e.target.value),
+                          longitude: c?.longitude ?? 0,
+                        }))
                       }
                     />
                   </div>
@@ -194,7 +218,10 @@ function SosPage() {
                       type="number"
                       step="any"
                       onChange={(e) =>
-                        setCoords((c) => ({ latitude: c?.latitude ?? 0, longitude: Number(e.target.value) }))
+                        setCoords((c) => ({
+                          latitude: c?.latitude ?? 0,
+                          longitude: Number(e.target.value),
+                        }))
                       }
                     />
                   </div>
@@ -271,7 +298,9 @@ function SosPage() {
                   min={1}
                   max={50}
                   value={conditions.injuredCount ?? 1}
-                  onChange={(e) => setConditions((c) => ({ ...c, injuredCount: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setConditions((c) => ({ ...c, injuredCount: Number(e.target.value) }))
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -324,14 +353,16 @@ function SosPage() {
             </h2>
             {analysing || !assessment ? (
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" aria-hidden /> Analyzing emergency information…
+                <Loader2 className="size-4 animate-spin" aria-hidden /> Analyzing emergency
+                information…
               </p>
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-3">
                   <PriorityBadge priority={assessment.priority} className="px-3 py-1 text-sm" />
                   <span className="text-sm text-muted-foreground">
-                    Score {assessment.score}/100 · confidence {(assessment.confidence * 100).toFixed(0)}%
+                    Score {assessment.score}/100 · confidence{" "}
+                    {(assessment.confidence * 100).toFixed(0)}%
                   </span>
                 </div>
                 <ul className="space-y-1 text-sm">
@@ -340,7 +371,8 @@ function SosPage() {
                   ))}
                 </ul>
                 <p className="rounded-md border border-warning/40 bg-warning/10 p-3 text-xs">
-                  AI assessment is decision support only. It does not replace professional medical judgment.
+                  AI assessment is decision support only. It does not replace professional medical
+                  judgment.
                 </p>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep("form")} disabled={analysing}>
@@ -364,10 +396,20 @@ function SosPage() {
                 </h2>
                 {!assigned ? (
                   <div className="flex shrink-0 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setStep("ai")} disabled={searching || assigning}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setStep("ai")}
+                      disabled={searching || assigning}
+                    >
                       Back
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/dashboard" })} disabled={assigning}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate({ to: "/dashboard" })}
+                      disabled={assigning}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -375,13 +417,14 @@ function SosPage() {
               </div>
               {searching ? (
                 <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" aria-hidden /> Scoring availability, distance, traffic and
-                  vehicle capability…
+                  <Loader2 className="size-4 animate-spin" aria-hidden /> Scoring availability,
+                  distance, traffic and vehicle capability…
                 </p>
               ) : null}
               {!searching && !candidates.length ? (
                 <p className="mt-2 text-sm text-emergency">
-                  No ambulance is currently available. Operations has been notified — please retry shortly.
+                  No ambulance is currently available. Operations has been notified — please retry
+                  shortly.
                 </p>
               ) : null}
             </div>
@@ -400,11 +443,14 @@ function SosPage() {
 
             {assigned && emergency ? (
               <div className="card-surface space-y-4 p-6">
-                <p className="font-medium text-success">Ambulance assigned ✓ Hospital recommendation ready</p>
+                <p className="font-medium text-success">
+                  Ambulance assigned ✓ Hospital recommendation ready
+                </p>
                 {(() => {
-                  const rec = coords && assessment
-                    ? rankHospitals(hospitals, coords, emergencyType, assessment.priority)[0]
-                    : null;
+                  const rec =
+                    coords && assessment
+                      ? rankHospitals(hospitals, coords, emergencyType, assessment.priority)[0]
+                      : null;
                   return rec ? <HospitalCard recommendation={rec} best /> : null;
                 })()}
                 <Button className="w-full" onClick={() => navigate({ to: "/live" })}>

@@ -53,15 +53,12 @@ export function EmergencyActivation({ onBack }: Props) {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    void runSOSPipeline(
-      (state) => {
-        setPipelineState(state);
-        if (state.completed || state.fatalError) {
-          setIsRunning(false);
-        }
-      },
-      controller.signal,
-    );
+    void runSOSPipeline((state) => {
+      setPipelineState(state);
+      if (state.completed || state.fatalError) {
+        setIsRunning(false);
+      }
+    }, controller.signal);
   }, [isRunning]);
 
   // Auto-start on mount
@@ -76,14 +73,10 @@ export function EmergencyActivation({ onBack }: Props) {
   // ── Derived state ───────────────────────────────────────────────────────
 
   const hasGPSFailure =
-    pipelineState?.fatalError &&
-    pipelineState.currentStep === "gps" &&
-    !isRunning;
+    pipelineState?.fatalError && pipelineState.currentStep === "gps" && !isRunning;
 
   const hasNonGPSFailure =
-    pipelineState?.fatalError &&
-    pipelineState.currentStep !== "gps" &&
-    !isRunning;
+    pipelineState?.fatalError && pipelineState.currentStep !== "gps" && !isRunning;
 
   const completed = pipelineState?.completed === true;
 
@@ -151,7 +144,8 @@ export function EmergencyActivation({ onBack }: Props) {
         {/* AI fallback notice */}
         {aiSkipped && (
           <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-warning-foreground">
-            ⚠️ AI assessment temporarily unavailable. Emergency coordination continued using fallback rules.
+            ⚠️ AI assessment temporarily unavailable. Emergency coordination continued using
+            fallback rules.
           </p>
         )}
 
@@ -194,8 +188,8 @@ export function EmergencyActivation({ onBack }: Props) {
 
         {/* Prototype disclaimer */}
         <p className="text-center text-xs text-muted-foreground pb-4">
-          This is an educational prototype. Emergency responses use simulated coordination
-          and are not connected to real emergency services.
+          This is an educational prototype. Emergency responses use simulated coordination and are
+          not connected to real emergency services.
         </p>
       </div>
     );
@@ -209,10 +203,7 @@ export function EmergencyActivation({ onBack }: Props) {
       <div className="flex flex-col items-center gap-4 pt-4 text-center">
         <span className="grid size-20 place-items-center rounded-full bg-emergency/10">
           <Siren
-            className={cn(
-              "size-10 text-emergency",
-              isRunning && "animate-pulse",
-            )}
+            className={cn("size-10 text-emergency", isRunning && "animate-pulse")}
             aria-hidden
           />
         </span>
@@ -221,9 +212,7 @@ export function EmergencyActivation({ onBack }: Props) {
             🚨 EMERGENCY ACTIVATED
           </h1>
           {isRunning && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              Please remain where you are.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Please remain where you are.</p>
           )}
         </div>
       </div>
@@ -238,7 +227,10 @@ export function EmergencyActivation({ onBack }: Props) {
       {/* GPS failure — retry + manual entry */}
       {hasGPSFailure && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border border-emergency/40 bg-emergency/5 px-4 py-3" role="alert">
+          <div
+            className="flex items-start gap-3 rounded-lg border border-emergency/40 bg-emergency/5 px-4 py-3"
+            role="alert"
+          >
             <AlertCircle className="mt-0.5 size-4 shrink-0 text-emergency" aria-hidden />
             <div>
               <p className="text-sm font-semibold text-emergency">Unable to detect your location</p>
@@ -249,7 +241,11 @@ export function EmergencyActivation({ onBack }: Props) {
           </div>
 
           <div className="grid gap-3">
-            <Button onClick={startPipeline} className="w-full gap-2" aria-label="Retry GPS location detection">
+            <Button
+              onClick={startPipeline}
+              className="w-full gap-2"
+              aria-label="Retry GPS location detection"
+            >
               <RefreshCw className="size-4" aria-hidden /> Retry Location
             </Button>
             <Button
@@ -306,7 +302,10 @@ export function EmergencyActivation({ onBack }: Props) {
       {/* Non-GPS pipeline error — retry */}
       {hasNonGPSFailure && (
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border border-emergency/40 bg-emergency/5 px-4 py-3" role="alert">
+          <div
+            className="flex items-start gap-3 rounded-lg border border-emergency/40 bg-emergency/5 px-4 py-3"
+            role="alert"
+          >
             <AlertCircle className="mt-0.5 size-4 shrink-0 text-emergency" aria-hidden />
             <div>
               <p className="text-sm font-semibold text-emergency">
@@ -345,4 +344,3 @@ function Check({ label }: { label: string }) {
     </div>
   );
 }
-

@@ -1,4 +1,15 @@
-import { supabase } from "@/integrations/supabase/client";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { handleFirestoreError, OperationType } from "@/lib/firestoreErrors";
 import type { AppNotification, AppRole } from "@/lib/types";
 
 export interface NotifyInput {
@@ -11,19 +22,31 @@ export interface NotifyInput {
 }
 
 /**
- * In-app notification transport. A push transport (e.g. FCM) can be added here
- * later without touching any caller.
+ * In-app notification transport backed by Firestore.
  */
 export async function notify(input: NotifyInput) {
-  const { error } = await supabase.from("notifications").insert({
+  const id = `NOTIF-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  const item: AppNotification = {
+    id,
     user_id: input.userId ?? null,
     role: input.role ?? null,
     emergency_id: input.emergencyId ?? null,
     title: input.title,
     message: input.message ?? null,
     type: input.type ?? "INFO",
-  } as never);
-  if (error) console.error("notification failed", error.message);
+    read: false,
+    created_at: new Date().toISOString(),
+  };
+
+  try {
+    await setDoc(doc(db, "notifications", id), item);
+  } catch (error) {
+    try {
+      handleFirestoreError(error, OperationType.CREATE, `notifications/${id}`);
+    } catch {
+      // Non-blocking notification write
+    }
+  }
 }
 
 export async function notifyMany(items: NotifyInput[]) {
@@ -31,22 +54,37 @@ export async function notifyMany(items: NotifyInput[]) {
 }
 
 export async function listNotifications(): Promise<AppNotification[]> {
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(60);
-  if (error) throw error;
-  return (data ?? []) as unknown as AppNotification[];
+  try {
+    const q = query(collection(db, "notifications"), orderBy("created_at", "desc"), limit(60));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => d.data() as AppNotification);
+  } catch (error) {
+    try {
+      handleFirestoreError(error, OperationType.LIST, "notifications");
+    } catch {
+      return [];
+    }
+    return [];
+  }
 }
 
 export async function markRead(id: string) {
-  await supabase.from("notifications").update({ read: true } as never).eq("id", id);
+  try {
+    await updateDoc(doc(db, "notifications", id), { read: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `notifications/${id}`);
+  }
 }
 
 export async function markAllRead(ids: string[]) {
   if (!ids.length) return;
-  await supabase.from("notifications").update({ read: true } as never).in("id", ids);
+  await Promise.all(ids.map((id) => markRead(id)));
 }
 
-export const notificationService = { notify, notifyMany, listNotifications, markRead, markAllRead };
+export const notificationService = {
+  notify,
+  notifyMany,
+  listNotifications,
+  markRead,
+  markAllRead,
+};

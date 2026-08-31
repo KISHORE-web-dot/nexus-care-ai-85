@@ -21,7 +21,11 @@ type SubStep = 1 | 2 | 3 | 4;
 
 const CONSCIOUSNESS_OPTIONS: { value: ConsciousnessStatus; label: string; note?: string }[] = [
   { value: "YES", label: "Yes" },
-  { value: "NO", label: "No", note: "Person reported as unconscious (as reported by bystander — not a medical diagnosis)" },
+  {
+    value: "NO",
+    label: "No",
+    note: "Person reported as unconscious (as reported by bystander — not a medical diagnosis)",
+  },
   { value: "UNKNOWN", label: "Don't Know" },
 ];
 
@@ -93,7 +97,11 @@ export function BystanderSOS({ onComplete, onBack }: Props) {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6" role="form" aria-label={`Bystander emergency report — step ${subStep} of 4`}>
+    <div
+      className="space-y-6"
+      role="form"
+      aria-label={`Bystander emergency report — step ${subStep} of 4`}
+    >
       {/* Progress dots */}
       <div className="flex gap-1.5" aria-hidden>
         {([1, 2, 3, 4] as SubStep[]).map((s) => (
@@ -264,7 +272,9 @@ export function BystanderSOS({ onComplete, onBack }: Props) {
           variant="outline"
           onClick={handleBack}
           className="gap-2"
-          aria-label={subStep === 1 ? "Back to emergency type selection" : "Back to previous question"}
+          aria-label={
+            subStep === 1 ? "Back to emergency type selection" : "Back to previous question"
+          }
         >
           <ArrowLeft className="size-4" aria-hidden /> Back
         </Button>
@@ -281,4 +291,3 @@ export function BystanderSOS({ onComplete, onBack }: Props) {
     </div>
   );
 }
-

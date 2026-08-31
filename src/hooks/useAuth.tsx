@@ -1,13 +1,21 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Session, User } from "@supabase/supabase-js";
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { supabase } from "@/integrations/supabase/client";
+import { auth, db } from "@/lib/firebase";
+import { authService } from "@/services/authService";
 import type { AppRole } from "@/lib/types";
 
+export interface CustomAuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  role: AppRole | null;
+}
+
 interface AuthValue {
-  session: Session | null;
-  user: User | null;
+  user: CustomAuthUser | null;
   role: AppRole | null;
   name: string;
   loading: boolean;
@@ -15,7 +23,6 @@ interface AuthValue {
 }
 
 const AuthContext = createContext<AuthValue>({
-  session: null,
   user: null,
   role: null,
   name: "",
@@ -24,51 +31,96 @@ const AuthContext = createContext<AuthValue>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [demoUser, setDemoUser] = useState<CustomAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
-      setSession(next);
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        queryClient.invalidateQueries();
+    // Check demo user in localStorage
+    const readDemoUser = () => {
+      try {
+        const saved = localStorage.getItem("demo_auth_user");
+        if (saved) {
+          setDemoUser(JSON.parse(saved));
+        } else {
+          setDemoUser(null);
+        }
+      } catch {
+        setDemoUser(null);
       }
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    };
+
+    readDemoUser();
+
+    const handleDemoChange = () => {
+      readDemoUser();
+      queryClient.invalidateQueries();
+    };
+
+    window.addEventListener("demo-auth-changed", handleDemoChange);
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
       setLoading(false);
+      queryClient.invalidateQueries();
     });
-    return () => sub.subscription.unsubscribe();
+
+    return () => {
+      window.removeEventListener("demo-auth-changed", handleDemoChange);
+      unsubscribe();
+    };
   }, [queryClient]);
 
-  const userId = session?.user.id;
+  const activeUserId = firebaseUser?.uid || demoUser?.uid;
 
   const { data: profile } = useQuery({
-    queryKey: ["auth-profile", userId],
-    enabled: !!userId,
+    queryKey: ["auth-profile", activeUserId],
+    enabled: !!activeUserId,
     queryFn: async () => {
-      const [{ data: roleRow }, { data: profileRow }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId!).limit(1).maybeSingle(),
-        supabase.from("profiles").select("name").eq("id", userId!).maybeSingle(),
-      ]);
+      if (demoUser && activeUserId === demoUser.uid) {
+        return { role: demoUser.role, name: demoUser.displayName || "Demo User" };
+      }
+      if (!activeUserId) return null;
+      try {
+        const snap = await getDoc(doc(db, "profiles", activeUserId));
+        if (snap.exists()) {
+          const data = snap.data();
+          return {
+            role: (data["role"] as AppRole) ?? null,
+            name: (data["name"] as string) ?? firebaseUser?.displayName ?? "User",
+          };
+        }
+      } catch (err) {
+        console.warn("Could not fetch user profile:", err);
+      }
       return {
-        role: ((roleRow as { role: AppRole } | null)?.role ?? null) as AppRole | null,
-        name: (profileRow as { name: string } | null)?.name ?? "",
+        role: "PATIENT" as AppRole,
+        name: firebaseUser?.displayName || "User",
       };
     },
   });
 
+  const currentUser: CustomAuthUser | null = firebaseUser
+    ? {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        role: profile?.role ?? null,
+      }
+    : demoUser;
+
   const value: AuthValue = {
-    session,
-    user: session?.user ?? null,
-    role: profile?.role ?? ((session?.user.user_metadata?.["role"] as AppRole) ?? null),
-    name: profile?.name || ((session?.user.user_metadata?.["name"] as string) ?? "User"),
+    user: currentUser,
+    role: profile?.role ?? currentUser?.role ?? null,
+    name: profile?.name || currentUser?.displayName || "User",
     loading,
     signOut: async () => {
+      await authService.signOut();
+      setDemoUser(null);
+      setFirebaseUser(null);
       await queryClient.cancelQueries();
       queryClient.clear();
-      await supabase.auth.signOut();
     },
   };
 

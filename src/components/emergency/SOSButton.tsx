@@ -93,9 +93,7 @@ export function SOSButton({ onActivate, disabled = false }: Props) {
         className={cn(
           "relative grid size-44 place-items-center rounded-full transition-all select-none touch-none",
           "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emergency/50 focus-visible:ring-offset-4",
-          disabled
-            ? "cursor-not-allowed opacity-40"
-            : "cursor-pointer active:scale-95",
+          disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer active:scale-95",
           holding
             ? "bg-emergency shadow-[0_0_40px_rgba(239,68,68,.5)]"
             : "bg-emergency/90 hover:bg-emergency hover:shadow-[0_0_30px_rgba(239,68,68,.35)]",
@@ -109,14 +107,18 @@ export function SOSButton({ onActivate, disabled = false }: Props) {
         >
           {/* Track */}
           <circle
-            cx="80" cy="80" r={RADIUS}
+            cx="80"
+            cy="80"
+            r={RADIUS}
             fill="none"
             stroke="rgba(255,255,255,0.15)"
             strokeWidth="6"
           />
           {/* Fill ring */}
           <circle
-            cx="80" cy="80" r={RADIUS}
+            cx="80"
+            cy="80"
+            r={RADIUS}
             fill="none"
             stroke="white"
             strokeWidth="6"
@@ -128,9 +130,7 @@ export function SOSButton({ onActivate, disabled = false }: Props) {
         </svg>
 
         {/* Label */}
-        <span className="relative z-10 text-5xl font-black tracking-wider text-white">
-          SOS
-        </span>
+        <span className="relative z-10 text-5xl font-black tracking-wider text-white">SOS</span>
       </button>
 
       {/* Instructions */}
@@ -145,4 +145,3 @@ export function SOSButton({ onActivate, disabled = false }: Props) {
     </div>
   );
 }
-

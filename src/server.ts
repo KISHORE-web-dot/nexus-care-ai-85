@@ -151,10 +151,10 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
     return json({
       id: String(body.ambulanceId ?? "AMB-001"),
-      vehicleNumber: "TN-38-AX-1234",
+      vehicleNumber: "MH-01-EA-101",
       capability: "ADVANCED",
-      driverName: "Raj Kumar",
-      etaMinutes: 7,
+      driverName: "Rajesh Shinde",
+      etaMinutes: 6,
       distanceKm: 1.4,
       status: "EN_ROUTE",
     });
@@ -167,37 +167,37 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
     const candidates = [
       {
-        id: "HSP-001",
-        name: "KMCH Hospital",
-        distanceKm: 3.2,
-        address: "Avinashi Road, Coimbatore, Tamil Nadu 641014",
+        id: "hosp-1",
+        name: "Bombay Hospital & Medical Research Centre",
+        distanceKm: 2.1,
+        address: "12 Marine Lines, Mumbai South 400020",
         emergencyAvailable: true,
         icuAvailable: true,
         specializations: ["Trauma", "Cardiology", "Neurology"],
-        travelMinutes: 8,
-        score: 94,
+        travelMinutes: 6,
+        score: 95,
       },
       {
-        id: "HSP-002",
-        name: "PSG Hospitals",
-        distanceKm: 4.1,
-        address: "Peelamedu, Coimbatore, Tamil Nadu 641004",
+        id: "hosp-2",
+        name: "Breach Candy Hospital Trust",
+        distanceKm: 3.8,
+        address: "60 A Bhulabhai Desai Road, South Mumbai 400026",
         emergencyAvailable: true,
         icuAvailable: true,
-        specializations: ["Trauma", "Orthopedics"],
-        travelMinutes: 11,
-        score: 88,
+        specializations: ["Trauma", "Cardiology", "Emergency Medicine"],
+        travelMinutes: 9,
+        score: 90,
       },
       {
-        id: "HSP-003",
-        name: "Sri Ramakrishna Hospital",
-        distanceKm: 2.8,
-        address: "Siddhapudur, Coimbatore, Tamil Nadu 641044",
+        id: "hosp-3",
+        name: "Saifee Hospital",
+        distanceKm: 2.4,
+        address: "15/17 Maharshi Karve Road, Charni Road, Mumbai South 400004",
         emergencyAvailable: true,
         icuAvailable: false,
-        specializations: ["General", "Pediatrics"],
+        specializations: ["General", "Emergency Medicine"],
         travelMinutes: 7,
-        score: 75,
+        score: 82,
       },
     ];
 
@@ -214,16 +214,16 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     }
 
     return json({
-      id: String(body.hospitalId ?? "HSP-001"),
-      name: "KMCH Hospital",
-      distanceKm: 3.2,
-      address: "Avinashi Road, Coimbatore, Tamil Nadu 641014",
+      id: String(body.hospitalId ?? "hosp-1"),
+      name: "Bombay Hospital & Medical Research Centre",
+      distanceKm: 2.1,
+      address: "12 Marine Lines, Mumbai South 400020",
       emergencyAvailable: true,
       icuAvailable: true,
       specializations: ["Trauma", "Cardiology", "Neurology"],
-      travelMinutes: 8,
-      latitude: 11.0168,
-      longitude: 76.9722,
+      travelMinutes: 6,
+      latitude: 18.9405,
+      longitude: 72.828,
     });
   }
 
@@ -246,7 +246,11 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     return json({
       events: [
         { status: "CREATED", timestamp: emergency.createdAt, label: "Emergency created" },
-        { status: "PRIORITY_ASSIGNED", timestamp: new Date().toISOString(), label: "Priority assessed" },
+        {
+          status: "PRIORITY_ASSIGNED",
+          timestamp: new Date().toISOString(),
+          label: "Priority assessed",
+        },
       ],
     });
   }

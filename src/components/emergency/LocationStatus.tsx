@@ -102,8 +102,8 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
         <h2 className="text-xl font-bold tracking-tight">Getting your location</h2>
         <LoadingState label="Requesting GPS permission…" />
         <p className="rounded-lg border border-info/40 bg-info/10 px-4 py-3 text-xs text-muted-foreground">
-          Your browser may ask for permission to access your location. Please allow this so emergency
-          responders can find you quickly.
+          Your browser may ask for permission to access your location. Please allow this so
+          emergency responders can find you quickly.
         </p>
       </div>
     );
@@ -123,7 +123,9 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
             </span>
             <div>
               <p className="font-semibold text-success">📍 Current location detected</p>
-              <p className="text-xs text-muted-foreground">Emergency responders will use this location.</p>
+              <p className="text-xs text-muted-foreground">
+                Emergency responders will use this location.
+              </p>
             </div>
           </div>
 
@@ -191,7 +193,10 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
                 step="any"
                 placeholder="e.g. 10.9876"
                 value={manualLat}
-                onChange={(e) => { setManualLat(e.target.value); setManualLatErr(false); }}
+                onChange={(e) => {
+                  setManualLat(e.target.value);
+                  setManualLatErr(false);
+                }}
                 aria-invalid={manualLatErr}
                 className={cn(manualLatErr && "border-emergency focus-visible:ring-emergency")}
                 aria-describedby={manualLatErr ? "lat-error" : undefined}
@@ -212,7 +217,10 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
                 step="any"
                 placeholder="e.g. 76.9558"
                 value={manualLng}
-                onChange={(e) => { setManualLng(e.target.value); setManualLngErr(false); }}
+                onChange={(e) => {
+                  setManualLng(e.target.value);
+                  setManualLngErr(false);
+                }}
                 aria-invalid={manualLngErr}
                 className={cn(manualLngErr && "border-emergency focus-visible:ring-emergency")}
                 aria-describedby={manualLngErr ? "lng-error" : undefined}
@@ -225,7 +233,8 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Tip: You can find your coordinates using Google Maps → long press on your location → copy the coordinates.
+            Tip: You can find your coordinates using Google Maps → long press on your location →
+            copy the coordinates.
           </p>
         </div>
 
@@ -261,7 +270,12 @@ export function LocationStatus({ onLocationCaptured, onBack }: Props) {
       />
 
       <div className="grid gap-3">
-        <Button onClick={detect} variant="outline" className="w-full gap-2" aria-label="Retry GPS location detection">
+        <Button
+          onClick={detect}
+          variant="outline"
+          className="w-full gap-2"
+          aria-label="Retry GPS location detection"
+        >
           <RefreshCw className="size-4" aria-hidden />
           Retry Location
         </Button>

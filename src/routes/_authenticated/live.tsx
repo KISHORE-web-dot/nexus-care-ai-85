@@ -14,9 +14,15 @@ export const Route = createFileRoute("/_authenticated/live")({
   head: () => ({
     meta: [
       { title: "Live emergency tracking — SmartResponse" },
-      { name: "description", content: "Follow the ambulance, hospital and case timeline in real time." },
+      {
+        name: "description",
+        content: "Follow the ambulance, hospital and case timeline in real time.",
+      },
       { property: "og:title", content: "Live emergency tracking — SmartResponse" },
-      { property: "og:description", content: "Real-time ambulance position, ETA and status updates." },
+      {
+        property: "og:description",
+        content: "Real-time ambulance position, ETA and status updates.",
+      },
     ],
   }),
   component: LivePage,
@@ -33,7 +39,10 @@ function LivePage() {
   const active =
     (isResponder
       ? emergencies?.find(
-          (e) => e.ambulance_id === myAmbulance?.id && e.status !== "COMPLETED" && e.status !== "CANCELLED",
+          (e) =>
+            e.ambulance_id === myAmbulance?.id &&
+            e.status !== "COMPLETED" &&
+            e.status !== "CANCELLED",
         )
       : emergencies?.find(
           (e) => e.reported_by === user?.id && e.status !== "COMPLETED" && e.status !== "CANCELLED",
@@ -68,7 +77,13 @@ function LivePage() {
   }
 
   const markers: MapMarker[] = [
-    { id: "patient", latitude: active.latitude, longitude: active.longitude, label: "Patient", kind: "patient" },
+    {
+      id: "patient",
+      latitude: active.latitude,
+      longitude: active.longitude,
+      label: "Patient",
+      kind: "patient",
+    },
   ];
   if (ambulance)
     markers.push({

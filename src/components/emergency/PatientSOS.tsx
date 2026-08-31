@@ -31,12 +31,18 @@ export function PatientSOS({ onConfirm, onCancel }: Props) {
 
         {/* Safety note */}
         <p className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs text-warning-foreground">
-          This is an educational prototype. In a real emergency, always call your local emergency number (112 / 911).
+          This is an educational prototype. In a real emergency, always call your local emergency
+          number (112 / 911).
         </p>
 
         {/* Actions */}
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
-          <Button variant="outline" onClick={onCancel} className="sm:min-w-28" aria-label="Cancel — go back">
+          <Button
+            variant="outline"
+            onClick={onCancel}
+            className="sm:min-w-28"
+            aria-label="Cancel — go back"
+          >
             Cancel
           </Button>
           <Button
@@ -53,4 +59,3 @@ export function PatientSOS({ onConfirm, onCancel }: Props) {
     </div>
   );
 }
-

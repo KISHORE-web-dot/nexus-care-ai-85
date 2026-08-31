@@ -51,7 +51,10 @@ export function AmbulanceCard({
       </dl>
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {a.equipment.map((e) => (
-          <li key={e} className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+          <li
+            key={e}
+            className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+          >
             {e}
           </li>
         ))}
@@ -83,7 +86,8 @@ export function HospitalCard({
             {h.name} {best ? <span aria-label="recommended">⭐</span> : null}
           </p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-3" aria-hidden /> {recommendation.distanceKm.toFixed(1)} km · {h.address}
+            <MapPin className="size-3" aria-hidden /> {recommendation.distanceKm.toFixed(1)} km ·{" "}
+            {h.address}
           </p>
         </div>
         <StatusBadge status={h.emergency_available ? "AVAILABLE" : "BUSY"} />
@@ -104,7 +108,10 @@ export function HospitalCard({
       </dl>
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {h.specializations.map((s) => (
-          <li key={s} className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
+          <li
+            key={s}
+            className="rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+          >
             {s}
           </li>
         ))}

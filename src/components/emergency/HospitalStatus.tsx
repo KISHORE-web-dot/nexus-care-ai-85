@@ -18,7 +18,11 @@ function Avail({ available, label }: { available: boolean; label: string }) {
         <XCircle className="size-4 text-emergency" aria-hidden />
       )}
       <span className="font-medium">{label}</span>
-      <span className={available ? "text-success text-xs font-semibold" : "text-emergency text-xs font-semibold"}>
+      <span
+        className={
+          available ? "text-success text-xs font-semibold" : "text-emergency text-xs font-semibold"
+        }
+      >
         {available ? "Available" : "Full"}
       </span>
     </div>
@@ -66,4 +70,3 @@ export function HospitalStatus({ hospital }: Props) {
     </div>
   );
 }
-

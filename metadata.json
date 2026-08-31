@@ -1,0 +1,6 @@
+{
+  "name": "Nexus Care AI",
+  "description": "Smart emergency response and medical coordination platform with AI triage, ambulance dispatch, and hospital routing.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

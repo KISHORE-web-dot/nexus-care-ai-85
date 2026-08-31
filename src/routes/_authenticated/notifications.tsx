@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
     meta: [
       { title: "Notifications — SmartResponse" },
-      { name: "description", content: "Every dispatch, status change and hospital alert in one feed." },
+      {
+        name: "description",
+        content: "Every dispatch, status change and hospital alert in one feed.",
+      },
       { property: "og:title", content: "Notifications — SmartResponse" },
       { property: "og:description", content: "Real-time emergency alerts for your role." },
     ],
@@ -58,7 +61,10 @@ function NotificationsPage() {
         {isLoading ? <LoadingState label="Loading notifications…" /> : null}
 
         {!isLoading && !items.length ? (
-          <EmptyState title="No notifications yet" description="Alerts appear here as emergencies progress." />
+          <EmptyState
+            title="No notifications yet"
+            description="Alerts appear here as emergencies progress."
+          />
         ) : null}
 
         <ul className="space-y-3">
@@ -69,10 +75,14 @@ function NotificationsPage() {
                   <p className="flex items-center gap-2 font-medium">
                     <Bell className="size-4" aria-hidden />
                     {n.title}
-                    {!n.read ? <span className="size-2 rounded-full bg-primary" aria-label="unread" /> : null}
+                    {!n.read ? (
+                      <span className="size-2 rounded-full bg-primary" aria-label="unread" />
+                    ) : null}
                   </p>
                   <p className="text-sm text-muted-foreground">{n.message}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{new Date(n.created_at).toLocaleString()}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(n.created_at).toLocaleString()}
+                  </p>
                 </div>
                 <div className="flex shrink-0 flex-col gap-2">
                   {n.emergency_id ? (

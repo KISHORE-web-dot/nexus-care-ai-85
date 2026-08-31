@@ -66,10 +66,12 @@ export function SOSTimeline({ steps }: Props) {
 
             {/* Error / skip message */}
             {s.error && (
-              <p className={cn(
-                "mt-0.5 text-xs",
-                s.status === "failed" ? "text-emergency/80" : "text-warning/80",
-              )}>
+              <p
+                className={cn(
+                  "mt-0.5 text-xs",
+                  s.status === "failed" ? "text-emergency/80" : "text-warning/80",
+                )}
+              >
                 {s.error}
               </p>
             )}
@@ -86,4 +88,3 @@ export function SOSTimeline({ steps }: Props) {
     </ol>
   );
 }
-

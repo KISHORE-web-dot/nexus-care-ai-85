@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/useAuth";
+import { TenantProvider } from "@/hooks/useTenant";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -79,11 +80,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SmartResponse — AI Emergency & Ambulance Coordination" },
+      { title: "Nexus Care AI — AI Emergency & Ambulance Coordination" },
       {
         name: "description",
         content:
-          "Prototype platform coordinating SOS requests, AI triage, ambulance dispatch, live tracking and hospital readiness.",
+          "Smart emergency response and medical coordination platform with AI triage, ambulance dispatch, and hospital routing.",
       },
       { name: "author", content: "SmartResponse" },
       { property: "og:type", content: "website" },
@@ -120,9 +121,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster position="top-right" richColors />
+        <TenantProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <Toaster position="top-right" richColors />
+        </TenantProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

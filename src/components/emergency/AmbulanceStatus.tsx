@@ -33,13 +33,12 @@ export function AmbulanceStatus({ ambulance }: Props) {
             isActive ? "bg-primary/10" : "bg-success/10",
           )}
         >
-          <Truck
-            className={cn("size-5", isActive ? "text-primary" : "text-success")}
-            aria-hidden
-          />
+          <Truck className={cn("size-5", isActive ? "text-primary" : "text-success")} aria-hidden />
         </span>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Ambulance</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Ambulance
+          </p>
           <p className="text-lg font-bold tracking-wide">{ambulance.vehicleNumber}</p>
         </div>
       </div>
@@ -73,4 +72,3 @@ export function AmbulanceStatus({ ambulance }: Props) {
     </div>
   );
 }
-

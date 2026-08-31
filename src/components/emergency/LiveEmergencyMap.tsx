@@ -20,7 +20,9 @@ export function LiveEmergencyMap({ location, ambulance }: Props) {
   return (
     <div className="card-surface space-y-3 rounded-xl p-5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Live Map</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Live Map
+        </p>
         {hasAmbulanceGPS && (
           <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
             <span className="size-1.5 rounded-full bg-success animate-pulse" aria-hidden /> Live
@@ -35,10 +37,14 @@ export function LiveEmergencyMap({ location, ambulance }: Props) {
         aria-label={`Map showing your location at ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
       >
         {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: "linear-gradient(rgba(0,0,0,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.3) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }} />
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(0,0,0,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.3) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
 
         {/* Patient marker (centre) */}
         <div className="relative z-10 flex flex-col items-center">
