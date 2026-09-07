@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -160,6 +161,7 @@ function AuthPage() {
                 Back to Home
               </Link>
             </Button>
+            <ThemeToggle />
           </div>
 
           <div className="card-surface p-5 space-y-4">

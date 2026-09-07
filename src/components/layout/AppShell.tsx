@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import type { AppRole } from "@/lib/types";
 import { listNotifications } from "@/services/notificationService";
 import { TenantSwitcher } from "./TenantSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavItem {
   to: string;
@@ -226,6 +227,7 @@ export function AppShell({
           </div>
 
           <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
             <Button
               asChild
               variant="ghost"

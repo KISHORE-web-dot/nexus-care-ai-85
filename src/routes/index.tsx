@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -211,6 +212,7 @@ function Landing() {
           </span>
           <span className="font-semibold">SmartResponse</span>
           <nav className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
               <Link to="/auth">Login</Link>
             </Button>
