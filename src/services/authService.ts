@@ -1,8 +1,10 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   auth,
+  createUserWithEmailAndPassword,
   db,
   googleProvider,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
 } from "@/lib/firebase";
@@ -87,6 +89,76 @@ export async function ensureProfile(
   }
 }
 
+export async function signInWithEmail(
+  email: string,
+  password: string,
+  fallbackRole: AppRole = "PATIENT",
+) {
+  const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+  const user = result.user;
+  if (user) {
+    await ensureProfile(
+      user.uid,
+      user.displayName || email.split("@")[0] || "User",
+      user.email || email,
+      user.phoneNumber || null,
+      fallbackRole,
+    );
+  }
+  return user;
+}
+
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  selectedRole: AppRole = "PATIENT",
+  name?: string,
+) {
+  const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
+  const user = result.user;
+  if (user) {
+    const displayName = name?.trim() || email.split("@")[0] || "User";
+    await ensureProfile(
+      user.uid,
+      displayName,
+      user.email || email,
+      user.phoneNumber || null,
+      selectedRole,
+    );
+  }
+  return user;
+}
+
+export function formatAuthErrorMessage(error: unknown): string {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { code: string }).code;
+    switch (code) {
+      case "auth/invalid-email":
+        return "Please enter a valid email address.";
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+      case "auth/invalid-credential":
+        return "Invalid email or password.";
+      case "auth/email-already-in-use":
+        return "An account already exists with this email address. Please sign in instead.";
+      case "auth/weak-password":
+        return "Password must be at least 6 characters long.";
+      case "auth/operation-not-allowed":
+        return "Email/password authentication is not enabled in Firebase.";
+      case "auth/popup-closed-by-user":
+        return "Google sign-in popup was closed before completing.";
+      case "auth/network-request-failed":
+        return "Network connection issue. Please check your internet connection.";
+      default:
+        break;
+    }
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Authentication failed. Please check your credentials.";
+}
+
 export async function signInWithGoogle(selectedRole: AppRole = "PATIENT") {
   const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
@@ -142,10 +214,13 @@ export async function fetchRole(userId: string): Promise<AppRole | null> {
 }
 
 export const authService = {
+  signInWithEmail,
+  signUpWithEmail,
   signInWithGoogle,
   signInDemo,
   signOut,
   fetchRole,
   ensureProfile,
+  formatAuthErrorMessage,
   DEMO_ACCOUNTS,
 };

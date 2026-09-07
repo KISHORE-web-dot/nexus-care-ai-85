@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { initializeFirestore, setLogLevel } from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
 
@@ -18,4 +25,4 @@ export const db = initializeFirestore(
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export { signInWithPopup, signOut };
+export { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut };

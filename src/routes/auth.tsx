@@ -1,9 +1,10 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Siren } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, Siren } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -14,7 +15,14 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import type { AppRole } from "@/lib/types";
-import { DEMO_ACCOUNTS, signInDemo, signInWithGoogle } from "@/services/authService";
+import {
+  DEMO_ACCOUNTS,
+  formatAuthErrorMessage,
+  signInDemo,
+  signInWithEmail,
+  signInWithGoogle,
+  signUpWithEmail,
+} from "@/services/authService";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -23,7 +31,7 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Sign in with Google or use a demo account to explore the emergency coordination prototype.",
+          "Sign in with Email, Google, or use a demo account to explore the emergency coordination prototype.",
       },
       { property: "og:title", content: "Sign in — SmartResponse" },
       {
@@ -41,7 +49,13 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [busy, setBusy] = useState<string | null>(null);
-  const [googleRole, setGoogleRole] = useState<AppRole>("PATIENT");
+  const [selectedRole, setSelectedRole] = useState<AppRole>("PATIENT");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     if (user) navigate({ to: "/dashboard", replace: true });
@@ -49,9 +63,42 @@ function AuthPage() {
 
   const go = () => navigate({ to: "/dashboard", replace: true });
 
-  const handleDemo = async (email: string) => {
-    const account = DEMO_ACCOUNTS.find((a) => a.email === email)!;
-    setBusy(email);
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    if (!password) {
+      toast.error("Please enter your password");
+      return;
+    }
+    if (isSignUp && password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    setBusy("email");
+    try {
+      if (isSignUp) {
+        await signUpWithEmail(cleanEmail, password, selectedRole, fullName);
+        toast.success(`Account created as ${selectedRole}`);
+      } else {
+        await signInWithEmail(cleanEmail, password, selectedRole);
+        toast.success("Signed in successfully");
+      }
+      go();
+    } catch (err) {
+      toast.error(formatAuthErrorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleDemo = async (demoEmail: string) => {
+    const account = DEMO_ACCOUNTS.find((a) => a.email === demoEmail)!;
+    setBusy(demoEmail);
     try {
       await signInDemo(account);
       toast.success(`Signed in as ${account.label}`);
@@ -66,11 +113,11 @@ function AuthPage() {
   const handleGoogleSignIn = async () => {
     setBusy("google");
     try {
-      await signInWithGoogle(googleRole);
+      await signInWithGoogle(selectedRole);
       toast.success("Signed in with Google");
       go();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Google sign-in failed");
+      toast.error(formatAuthErrorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -117,32 +164,140 @@ function AuthPage() {
 
           <div className="card-surface p-5 space-y-4">
             <div>
-              <p className="text-base font-semibold">Sign in with Google</p>
+              <p className="text-base font-semibold">
+                {isSignUp ? "Create an account" : "Sign in to your account"}
+              </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Authenticate securely via Firebase Google Sign-In.
+                {isSignUp
+                  ? "Enter your email and password to register a new portal account."
+                  : "Enter your email and password to access the emergency platform."}
               </p>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="google-role">Select your portal role</Label>
-              <Select value={googleRole} onValueChange={(val) => setGoogleRole(val as AppRole)}>
-                <SelectTrigger id="google-role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <form onSubmit={handleEmailAuth} className="space-y-3.5">
+              {isSignUp && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="auth-name">Full Name</Label>
+                  <Input
+                    id="auth-name"
+                    type="text"
+                    placeholder="e.g. Dr. Jane Smith"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={!!busy}
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <Label htmlFor="auth-email">Email address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="auth-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-9"
+                    required
+                    autoComplete="email"
+                    disabled={!!busy}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="auth-password">Password</Label>
+                  {isSignUp && (
+                    <span className="text-[11px] text-muted-foreground">Min. 6 characters</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    id="auth-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9 pr-9"
+                    required
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
+                    disabled={!!busy}
+                  />
+                  <button
+                    type="button"
+                    id="btn-toggle-password-visibility"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="auth-role">Select your portal role</Label>
+                <Select
+                  value={selectedRole}
+                  onValueChange={(val) => setSelectedRole(val as AppRole)}
+                  disabled={!!busy}
+                >
+                  <SelectTrigger id="auth-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                id="btn-submit-email-auth"
+                type="submit"
+                className="w-full gap-2"
+                disabled={!!busy}
+              >
+                {busy === "email" ? <Loader2 className="size-4 animate-spin" /> : null}
+                {isSignUp ? "Create Account" : "Sign in with Email"}
+              </Button>
+
+              <div className="text-center pt-0.5">
+                <button
+                  id="btn-toggle-auth-mode"
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+                >
+                  {isSignUp
+                    ? "Already have an account? Sign in"
+                    : "Don't have an account? Create one"}
+                </button>
+              </div>
+            </form>
+
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
             </div>
 
             <Button
+              id="btn-google-auth"
               type="button"
+              variant="outline"
               className="w-full gap-2"
-              disabled={busy === "google"}
+              disabled={!!busy}
               onClick={handleGoogleSignIn}
             >
               {busy === "google" ? (
